@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: pg
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: jwt_security
+      PGDATA: /var/lib/postgresql/data/pgdata
+#    volumes:
+#      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - jwtsecuritynetwork
+    restart: unless-stopped
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8000:8080"
+    networks:
+      - jwtsecuritynetwork
+
+networks:
+  jwtsecuritynetwork:
+    name: jwtsecuritynetwork
+    driver: bridge
+
+#volumes:
+#  db:
