@@ -2,6 +2,7 @@ package dev.bogdanjovanovic.jwtsecurity.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import java.nio.channels.NonReadableChannelException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 public class DefaultExceptionHandler {
@@ -38,6 +40,16 @@ public class DefaultExceptionHandler {
         "Invalid parameter(s)", HttpStatus.BAD_REQUEST.value(),
         LocalDateTime.now());
     return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+      final NoResourceFoundException ex,
+      final HttpServletRequest request) {
+    final ApiResponse response = new ApiResponse(request.getRequestURI(),
+        ex.getMessage(), HttpStatus.NOT_FOUND.value(),
+        LocalDateTime.now());
+    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(Exception.class)
