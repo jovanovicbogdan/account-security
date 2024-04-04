@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @DisplayName("Integration tests for Authentication API endpoints")
 @Tag("integration")
-class AuthenticationUnitTests {
+class AuthenticationIntegrationTests {
 
 	@Autowired
 	private MockMvc mvc;
