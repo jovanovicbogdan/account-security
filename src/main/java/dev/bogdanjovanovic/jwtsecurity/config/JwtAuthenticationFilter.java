@@ -1,5 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
+import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.JwtService;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
 import jakarta.servlet.FilterChain;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -65,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         );
         SecurityContextHolder.getContext().setAuthentication(authToken);
       } else {
-        throw new UsernameNotFoundException("Authentication failed");
+        throw new UnauthorizedException("Authentication failed");
       }
     }
     filterChain.doFilter(request, response);

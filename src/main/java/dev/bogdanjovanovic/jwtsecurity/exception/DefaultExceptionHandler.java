@@ -62,6 +62,16 @@ public class DefaultExceptionHandler {
     return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.CONFLICT);
   }
 
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+      final UnauthorizedException ex,
+      final HttpServletRequest request) {
+    final ApiResponse response = new ApiResponse(request.getRequestURI(),
+        ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
+        LocalDateTime.now());
+    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(final Exception ex,
       final HttpServletRequest request) {
