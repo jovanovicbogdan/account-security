@@ -1,6 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.auth;
 
 import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
+import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
 import dev.bogdanjovanovic.jwtsecurity.token.JwtService;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
@@ -33,6 +34,9 @@ public class AuthService {
   }
 
   public void register(final RegisterRequest request) {
+    userRepository.findByUsername(request.username()).ifPresent((user) -> {
+      throw new ConflictException("The username '" + user.getUsername() + "' is already registered.");
+    });
     final User user = User.builder()
         .firstName(request.firstName())
         .lastName(request.lastName())
@@ -58,7 +62,8 @@ public class AuthService {
   }
 
   private void revokeAllUserTokens(final User user) {
-    final List<Token> validUserTokens = tokenRepository.findAllValidTokensByUserId(user.getUserId());
+    final List<Token> validUserTokens = tokenRepository.findAllValidTokensByUserId(
+        user.getUserId());
     if (validUserTokens.isEmpty()) {
       return;
     }

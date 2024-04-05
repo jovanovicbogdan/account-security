@@ -52,6 +52,16 @@ public class DefaultExceptionHandler {
     return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+      final ConflictException ex,
+      final HttpServletRequest request) {
+    final ApiResponse response = new ApiResponse(request.getRequestURI(),
+        ex.getMessage(), HttpStatus.CONFLICT.value(),
+        LocalDateTime.now());
+    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.CONFLICT);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(final Exception ex,
       final HttpServletRequest request) {
