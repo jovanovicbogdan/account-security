@@ -120,6 +120,20 @@ public class User implements UserDetails {
     this.tokens = builder.tokens;
   }
 
+  @Override
+  public String toString() {
+    return "User{" +
+        "userId=" + userId +
+        ", firstName='" + firstName + '\'' +
+        ", lastName='" + lastName + '\'' +
+        ", email='" + email + '\'' +
+        ", username='" + username + '\'' +
+        ", passwordHash='" + passwordHash + '\'' +
+        ", role=" + role +
+        ", tokens=" + tokens +
+        '}';
+  }
+
   public static Builder builder() {
     return new Builder();
   }
