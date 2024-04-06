@@ -2,13 +2,16 @@ package dev.bogdanjovanovic.jwtsecurity.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -21,13 +24,11 @@ public class SecurityConfig {
       "/api/v1/auth/**"
   };
   private final JwtAuthenticationFilter jwtAuthFilter;
-  private final AuthenticationProvider authProvider;
   private final LogoutHandler logoutHandler;
 
   public SecurityConfig(final JwtAuthenticationFilter jwtAuthFilter,
-      final AuthenticationProvider authProvider, final LogoutHandler logoutHandler) {
+      final LogoutHandler logoutHandler) {
     this.jwtAuthFilter = jwtAuthFilter;
-    this.authProvider = authProvider;
     this.logoutHandler = logoutHandler;
   }
 
@@ -41,14 +42,31 @@ public class SecurityConfig {
         })
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authProvider)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .oauth2ResourceServer(
+            oauth2 -> oauth2.jwt(
+                jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
         .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")
             .addLogoutHandler(logoutHandler)
             .logoutSuccessHandler(
-            ((request, response, authentication) -> SecurityContextHolder.clearContext())))
+                ((request, response, authentication) -> SecurityContextHolder.clearContext())))
         .build();
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public AuthenticationManager authenticationManager(final AuthenticationConfiguration config)
+      throws Exception {
+    return config.getAuthenticationManager();
+  }
+
+  @Bean
+  public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    return new JwtAuthenticationConverter();
   }
 
 }

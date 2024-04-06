@@ -2,7 +2,7 @@ package dev.bogdanjovanovic.jwtsecurity.auth;
 
 import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
-import dev.bogdanjovanovic.jwtsecurity.token.JwtService;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
@@ -17,16 +17,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-  private final JwtService jwtService;
+  private final TokenService tokenService;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final TokenRepository tokenRepository;
   private final AuthenticationManager authenticationManager;
 
-  public AuthService(final JwtService jwtService, final UserRepository userRepository,
+  public AuthService(final TokenService tokenService, final UserRepository userRepository,
       final PasswordEncoder passwordEncoder, final TokenRepository tokenRepository,
       final AuthenticationManager authenticationManager) {
-    this.jwtService = jwtService;
+    this.tokenService = tokenService;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.tokenRepository = tokenRepository;
@@ -56,7 +56,7 @@ public class AuthService {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UsernameNotFoundException("Authentication failed"));
     revokeAllUserTokens(user);
-    final String jwtToken = jwtService.generateJwtToken(user);
+    final String jwtToken = tokenService.generateJwtToken(user);
     saveUserToken(user, jwtToken);
     return new AuthResponse(jwtToken);
   }
