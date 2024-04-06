@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-//@Validated
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -25,7 +24,7 @@ public class AuthController {
   }
 
   @PostMapping("login")
-  public ApiResponseWrapper<AuthResponse> login(@RequestBody @Valid final AuthRequest request) {
+  public ApiResponseWrapper<AuthResponse> login(@RequestBody @Valid final LoginRequest request) {
     final AuthResponse authenticate = authService.authenticate(request);
     return new ApiResponseWrapper<>(authenticate);
   }

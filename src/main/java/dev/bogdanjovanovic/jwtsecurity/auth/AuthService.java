@@ -49,7 +49,7 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthResponse authenticate(final AuthRequest request) {
+  public AuthResponse authenticate(final LoginRequest request) {
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
         request.username(), request.password()
     ));

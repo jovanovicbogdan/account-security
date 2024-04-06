@@ -8,8 +8,6 @@ import dev.bogdanjovanovic.jwtsecurity.config.RsaKeyProperties;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -20,8 +18,6 @@ import org.springframework.context.ApplicationContext;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@DisplayName("Integration tests for Authentication API endpoints")
-@Tag("integration")
 class UserRepositoryTests extends AbstractTestcontainers {
 
   @Autowired

@@ -4,6 +4,8 @@ public class ApiResponseWrapper<T> {
 
   private T data;
 
+  public ApiResponseWrapper() { }
+
   public ApiResponseWrapper(final T data) {
     this.data = data;
   }
