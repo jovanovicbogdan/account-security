@@ -10,7 +10,11 @@ import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -42,9 +46,36 @@ public class ApplicationConfig {
   }
 
   @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
   public UserDetailsService userDetailsService() {
     return username -> userRepository.findByUsername(username)
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
   }
+
+  @Bean
+  public AuthenticationManager authenticationManager(final AuthenticationConfiguration config)
+      throws Exception {
+    return config.getAuthenticationManager();
+  }
+
+//  private JWTProcessor<SecurityContext> jwtProcessor() {
+//    JWKSource<SecurityContext> jwsJwkSource = new RemoteJWKSet<>(this.jwkSetUri);
+//    JWSKeySelector<SecurityContext> jwsKeySelector = new JWSVerificationKeySelector<>(this.jwsAlgorithm,
+//        jwsJwkSource);
+//
+//    JWKSource<SecurityContext> jweJwkSource = new ImmutableJWKSet<>(new JWKSet(rsaKeyProperties.rsaPublicKey()));
+//    JWEKeySelector<SecurityContext> jweKeySelector = new JWEDecryptionKeySelector<>(this.jweAlgorithm,
+//        this.encryptionMethod, jweJwkSource);
+//
+//    ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
+//    jwtProcessor.setJWSKeySelector(jwsKeySelector);
+//    jwtProcessor.setJWEKeySelector(jweKeySelector);
+//
+//    return jwtProcessor;
+//  }
 
 }

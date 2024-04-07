@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:4200"})
 public class AuthController {
 
   private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -27,8 +27,7 @@ public class AuthController {
 
   @PostMapping("login")
   public ApiResponseWrapper<AuthResponse> login(@RequestBody @Valid final LoginRequest request) {
-    final AuthResponse authenticate = authService.authenticate(request);
-    return new ApiResponseWrapper<>(authenticate);
+    return new ApiResponseWrapper<>(authService.authenticate(request));
   }
 
   @PostMapping("register")

@@ -18,10 +18,13 @@ public class TokenService {
 
   private final JwtEncoder jwtEncoder;
   private final JwtDecoder jwtDecoder;
+  private final TokenRepository tokenRepository;
 
-  public TokenService(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder) {
+  public TokenService(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
+      final TokenRepository tokenRepository) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
+    this.tokenRepository = tokenRepository;
   }
 
   public String generateJwtToken(final User user) {
@@ -32,7 +35,7 @@ public class TokenService {
     final JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuer("self")
         .issuedAt(now)
-        .expiresAt(now.plus(1, ChronoUnit.HOURS))
+        .expiresAt(now.plus(15L, ChronoUnit.MINUTES))
         .subject(user.getUsername())
         .claim("scope", scope)
         .build();
@@ -51,7 +54,10 @@ public class TokenService {
 
   public boolean isTokenValid(final String token, final UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    return tokenRepository.findByToken(token)
+        .map(t -> (username.equals(userDetails.getUsername())) && !isTokenExpired(token)
+            && !t.isRevoked())
+        .orElse(false);
   }
 
   public boolean isTokenExpired(final String token) {

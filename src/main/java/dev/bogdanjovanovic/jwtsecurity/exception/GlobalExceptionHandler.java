@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -67,6 +68,16 @@ public class GlobalExceptionHandler {
       final HttpServletRequest request) {
     final ApiResponse response = new ApiResponse(request.getRequestURI(),
         ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
+        LocalDateTime.now());
+    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+      final BadCredentialsException ex,
+      final HttpServletRequest request) {
+    final ApiResponse response = new ApiResponse(request.getRequestURI(),
+        "Authentication failed", HttpStatus.UNAUTHORIZED.value(),
         LocalDateTime.now());
     return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
   }

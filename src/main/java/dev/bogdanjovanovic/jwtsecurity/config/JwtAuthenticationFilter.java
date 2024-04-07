@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
-import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
+import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,13 +22,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final TokenService tokenService;
   private final UserDetailsService userDetailsService;
-  private final TokenRepository tokenRepository;
 
   public JwtAuthenticationFilter(final TokenService tokenService,
-      final UserDetailsService userDetailsService, final TokenRepository tokenRepository) {
+      final UserDetailsService userDetailsService) {
     this.tokenService = tokenService;
     this.userDetailsService = userDetailsService;
-    this.tokenRepository = tokenRepository;
   }
 
   @Override
@@ -59,10 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (username != null && authentication == null) {
       final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-      final boolean isTokenValid = tokenRepository.findByToken(token)
-          .map(t -> !t.isExpired() && !t.isRevoked() && tokenService.isTokenValid(token, userDetails))
-          .orElse(false);
-      if (isTokenValid) {
+      if (tokenService.isTokenValid(token, userDetails)) {
         final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
             userDetails, null, userDetails.getAuthorities()
         );

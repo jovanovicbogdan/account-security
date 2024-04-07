@@ -2,15 +2,15 @@ package dev.bogdanjovanovic.jwtsecurity.auth;
 
 import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
-import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
+import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,8 @@ public class AuthService {
 
   public void register(final RegisterRequest request) {
     userRepository.findByUsername(request.username()).ifPresent((user) -> {
-      throw new ConflictException("The username '" + user.getUsername() + "' is already registered.");
+      throw new ConflictException(
+          "The username '" + user.getUsername() + "' is already registered.");
     });
     final User user = User.builder()
         .firstName(request.firstName())
@@ -50,11 +51,15 @@ public class AuthService {
 
   @Transactional
   public AuthResponse authenticate(final LoginRequest request) {
+    final User user = userRepository.findByUsername(request.username())
+        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
         request.username(), request.password()
     ));
-    final User user = userRepository.findByUsername(request.username())
-        .orElseThrow(() -> new UsernameNotFoundException("Authentication failed"));
+//    if (!user.getUsername().equals(request.username()) || !passwordEncoder
+//        .matches(request.password(), user.getPassword())) {
+//      throw new UnauthorizedException("Authentication failed");
+//    }
     revokeAllUserTokens(user);
     final String jwtToken = tokenService.generateJwtToken(user);
     saveUserToken(user, jwtToken);
