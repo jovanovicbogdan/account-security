@@ -1,7 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
-import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
