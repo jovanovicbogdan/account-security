@@ -3,13 +3,12 @@ package dev.bogdanjovanovic.jwtsecurity.token;
 import dev.bogdanjovanovic.jwtsecurity.auth.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 
 @Entity
 @Table(name = "token")
@@ -20,7 +19,6 @@ public class Token {
   private Long tokenId;
   @Column(nullable = false, columnDefinition = "text")
   private String token;
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private TokenType tokenType;
   @Column(nullable = false)
@@ -66,10 +64,6 @@ public class Token {
 
   public void setRevoked(boolean revoked) {
     isRevoked = revoked;
-  }
-
-  public enum TokenType {
-    BEARER
   }
 
 }

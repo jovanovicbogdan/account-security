@@ -1,6 +1,5 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
-import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,12 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -42,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     final String token = authHeader.substring(7);
     try {
-      if (authenticateWithToken(token, request)) {
+      if (authenticateWithToken(token)) {
         filterChain.doFilter(request, response);
       } else {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -52,19 +49,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
   }
 
-  private boolean authenticateWithToken(final String token, final HttpServletRequest request) {
+  private boolean authenticateWithToken(final String token) {
     final String username = tokenService.extractUsername(token);
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (username != null && authentication == null) {
       final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-      if (tokenService.isTokenValid(token, userDetails)) {
-        final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-            userDetails, null, userDetails.getAuthorities()
-        );
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        return true;
-      }
+      return tokenService.isTokenValid(token, userDetails);
     }
     return false;
   }

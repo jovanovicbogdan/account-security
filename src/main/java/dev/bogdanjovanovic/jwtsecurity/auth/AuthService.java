@@ -4,7 +4,6 @@ import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
-import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import jakarta.transaction.Transactional;
@@ -12,6 +11,7 @@ import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,10 +56,6 @@ public class AuthService {
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
         request.username(), request.password()
     ));
-//    if (!user.getUsername().equals(request.username()) || !passwordEncoder
-//        .matches(request.password(), user.getPassword())) {
-//      throw new UnauthorizedException("Authentication failed");
-//    }
     revokeAllUserTokens(user);
     final String jwtToken = tokenService.generateJwtToken(user);
     saveUserToken(user, jwtToken);
