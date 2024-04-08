@@ -62,20 +62,4 @@ public class ApplicationConfig {
     return config.getAuthenticationManager();
   }
 
-//  private JWTProcessor<SecurityContext> jwtProcessor() {
-//    JWKSource<SecurityContext> jwsJwkSource = new RemoteJWKSet<>(this.jwkSetUri);
-//    JWSKeySelector<SecurityContext> jwsKeySelector = new JWSVerificationKeySelector<>(this.jwsAlgorithm,
-//        jwsJwkSource);
-//
-//    JWKSource<SecurityContext> jweJwkSource = new ImmutableJWKSet<>(new JWKSet(rsaKeyProperties.rsaPublicKey()));
-//    JWEKeySelector<SecurityContext> jweKeySelector = new JWEDecryptionKeySelector<>(this.jweAlgorithm,
-//        this.encryptionMethod, jweJwkSource);
-//
-//    ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
-//    jwtProcessor.setJWSKeySelector(jwsKeySelector);
-//    jwtProcessor.setJWEKeySelector(jweKeySelector);
-//
-//    return jwtProcessor;
-//  }
-
 }
