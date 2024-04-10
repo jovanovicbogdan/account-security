@@ -50,7 +50,7 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthResponse authenticate(final LoginRequest request) {
+  public AuthUserResponse authenticate(final LoginRequest request) {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -59,8 +59,14 @@ public class AuthService {
     revokeAllUserTokens(user);
     final String jwtToken = tokenService.generateJwtToken(user);
     saveUserToken(user, jwtToken);
-    return new AuthResponse(jwtToken);
+    return new AuthUserResponse(
+        user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
+        user.getUsername(), user.getRole(), jwtToken
+    );
   }
+
+//  public AuthUserResponse getCurrentUser() {
+//  }
 
   private void revokeAllUserTokens(final User user) {
     final List<Token> validUserTokens = tokenRepository.findAllValidTokensByUserId(

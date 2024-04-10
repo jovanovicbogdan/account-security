@@ -70,10 +70,6 @@ public class User implements UserDetails {
     return List.of(new SimpleGrantedAuthority(role.name()));
   }
 
-  public Long getUserId() {
-    return userId;
-  }
-
   @Override
   public String getPassword() {
     return passwordHash;
@@ -102,6 +98,26 @@ public class User implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
+  }
+
+  public Long getUserId() {
+    return userId;
+  }
+
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public Role getRole() {
+    return role;
   }
 
   public enum Role {

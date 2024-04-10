@@ -26,7 +26,7 @@ public class AuthController {
   }
 
   @PostMapping("login")
-  public ApiResponseWrapper<AuthResponse> login(@RequestBody @Valid final LoginRequest request) {
+  public ApiResponseWrapper<AuthUserResponse> login(@RequestBody @Valid final LoginRequest request) {
     return new ApiResponseWrapper<>(authService.authenticate(request));
   }
 
@@ -34,6 +34,9 @@ public class AuthController {
   @ResponseStatus(HttpStatus.CREATED)
   public void register(@RequestBody @Valid final RegisterRequest request) {
     authService.register(request);
+//    Cookie cookie = new Cookie("refresh-token", "kirYksalekPgkslkAsnk");
+//    cookie.setHttpOnly(true);
+//    cookie.setSecure(true);
   }
 
 }
