@@ -10,8 +10,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -28,10 +31,13 @@ public class Token {
   private boolean isExpired = false;
   @Column(nullable = false)
   private boolean isRevoked = false;
-  @CreatedBy
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
+  @CreatedDate
+  private Instant createdAt;
+  @LastModifiedDate
+  private Instant updatedAt;
 
   public Token() {
   }

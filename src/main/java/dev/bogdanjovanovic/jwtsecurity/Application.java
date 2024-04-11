@@ -16,10 +16,18 @@ public class Application {
   }
 
 //  @Bean
-//  CommandLineRunner commandLineRunner(final UserRepository userRepository) {
+//  CommandLineRunner commandLineRunner(final UserRepository userRepository,
+//      final PasswordEncoder passwordEncoder) {
 //    return (args) -> {
-//      final User user = new User("Bogdan", "Jovanovic", "bogdan@example.com", "bjovanovic",
-//          "bjovanovic", Role.ADMIN, Collections.emptyList());
+//      final User user = new User(
+//          "John",
+//          "Doe",
+//          "johndoe@example.com",
+//          "johndoe",
+//          passwordEncoder.encode("johndoe"),
+//          Role.ADMIN,
+//          Collections.emptyList()
+//      );
 //      userRepository.save(user);
 //    };
 //  }

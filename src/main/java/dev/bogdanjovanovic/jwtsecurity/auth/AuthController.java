@@ -38,6 +38,7 @@ public class AuthController {
   @PostMapping("login")
   public ApiResponseWrapper<AuthUserResponse> login(
       @RequestBody @Valid final LoginRequest request) {
+    log.info("Received login request for user: {}", request.username());
     return new ApiResponseWrapper<>(authService.authenticate(request));
   }
 

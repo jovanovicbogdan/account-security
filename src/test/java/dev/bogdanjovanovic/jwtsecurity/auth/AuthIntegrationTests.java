@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -33,6 +32,9 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
   @Autowired
   private TestRestTemplate restTemplate;
 
+  @Autowired
+  private UserRepository userRepository;
+
   @Test
   void whenUnauthenticated_thenShouldReturnUnauthorized() {
     final ResponseEntity<Void> response = restTemplate.exchange("/api/v1/demo", HttpMethod.GET,
@@ -41,15 +43,15 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
   }
 
   @Test
-  @Rollback
   void whenAuthenticated_thenShouldReturnOk() {
-    final String username = "johndoe";
-    final String password = "secretpassword";
+    final String username = FAKER.name().username();
+    final String password = FAKER.internet().password();
+    final String email = FAKER.internet().emailAddress();
 
     final RegisterRequest registerRequest = new RegisterRequest(
         "John",
         "Doe",
-        "johndoe@example.com",
+        email,
         username,
         password
     );
@@ -90,13 +92,14 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
   @Test
   void whenInvalidCredentials_thenShouldReturnUnauthorized() {
-    final String username = "johndoe";
-    final String password = "secretpassword";
+    final String username = FAKER.name().username();
+    final String password = FAKER.internet().password();
+    final String email = FAKER.internet().emailAddress();
 
     final RegisterRequest registerRequest = new RegisterRequest(
         "John",
         "Doe",
-        "johndoe@example.com",
+        email,
         username,
         password
     );
@@ -117,6 +120,53 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
         Void.class
     );
     assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+  }
+
+  @Test
+  void whenUserDoesNotExist_thenShouldReturnUnauthorized() {
+    final String username = FAKER.name().username();
+    final String password = FAKER.internet().password();
+
+    final LoginRequest loginRequest = new LoginRequest(username, password);
+
+    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+        "/api/v1/auth/login",
+        HttpMethod.POST,
+        new HttpEntity<>(loginRequest),
+        new ParameterizedTypeReference<>() { }
+    );
+    assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+  }
+
+  @Test
+  void whenUserExists_thenShouldReturnConflict() {
+    final String username = FAKER.name().username();
+    final String password = FAKER.internet().password();
+    final String email = FAKER.internet().emailAddress();
+
+    final RegisterRequest registerRequest = new RegisterRequest(
+        "John",
+        "Doe",
+        email,
+        username,
+        password
+    );
+
+    final ResponseEntity<Void> registerResponse = restTemplate.exchange(
+        "/api/v1/auth/register",
+        HttpMethod.POST,
+        new HttpEntity<>(registerRequest),
+        Void.class
+    );
+    assertThat(registerResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+    final ResponseEntity<Void> registerResponse2 = restTemplate.exchange(
+        "/api/v1/auth/register",
+        HttpMethod.POST,
+        new HttpEntity<>(registerRequest),
+        Void.class
+    );
+    assertThat(registerResponse2.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
   }
 
 }
