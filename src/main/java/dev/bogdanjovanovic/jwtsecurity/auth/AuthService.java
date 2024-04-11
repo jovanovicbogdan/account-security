@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -49,7 +50,7 @@ public class AuthService {
     userRepository.save(user);
   }
 
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public AuthUserResponse authenticate(final LoginRequest request) {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
@@ -66,7 +67,7 @@ public class AuthService {
     );
   }
 
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public AuthUserResponse refreshAuthToken(final String refreshToken) {
     final Token token = tokenRepository.findByToken(refreshToken)
         .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));

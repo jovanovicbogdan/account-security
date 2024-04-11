@@ -3,6 +3,7 @@ package dev.bogdanjovanovic.jwtsecurity.auth;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -10,15 +11,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 
   @Id
@@ -40,6 +45,8 @@ public class User implements UserDetails {
   private Role role;
   @OneToMany(mappedBy = "user")
   private List<Token> tokens;
+  @CreatedDate
+  private Instant createdAt;
 
   public User() {
   }
