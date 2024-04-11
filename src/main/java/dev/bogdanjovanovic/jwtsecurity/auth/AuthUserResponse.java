@@ -4,6 +4,6 @@ import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import java.util.UUID;
 
 public record AuthUserResponse(UUID userId, String firstName, String lastName, String email,
-                               String username, Role role, String authToken, String refreshToken) {
+                               String username, Role role, String authToken) {
 
 }

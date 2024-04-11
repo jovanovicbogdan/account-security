@@ -20,20 +20,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DisplayName("Integration tests for Authentication API endpoints")
 @Tag("integration")
-@Transactional
 public class AuthIntegrationTests extends AbstractTestcontainers {
 
   @Autowired
   private TestRestTemplate restTemplate;
-
-  @Autowired
-  private UserRepository userRepository;
 
   @Test
   void whenUnauthenticated_thenShouldReturnUnauthorized() {
@@ -66,7 +63,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthUser>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),
@@ -76,7 +73,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     assertThat(loginResponse.getBody()).isNotNull();
     assertThat(loginResponse.getBody().getData()).isNotNull();
 
-    final AuthUserResponse authResponse = loginResponse.getBody().getData();
+    final AuthUser authResponse = loginResponse.getBody().getData();
     final String authToken = authResponse.authToken();
 
     final HttpHeaders headers = new HttpHeaders();
@@ -129,7 +126,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthUser>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),

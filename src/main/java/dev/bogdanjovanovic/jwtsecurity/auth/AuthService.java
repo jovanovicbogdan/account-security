@@ -51,7 +51,7 @@ public class AuthService {
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public AuthUserResponse authenticate(final LoginRequest request) {
+  public AuthUser authenticate(final LoginRequest request) {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -61,14 +61,14 @@ public class AuthService {
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     final String refreshToken = tokenService.generateJwtToken(user, TokenType.REFRESH);
     saveUserToken(user, refreshToken);
-    return new AuthUserResponse(
+    return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
         user.getUsername(), user.getRole(), authToken, refreshToken
     );
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public AuthUserResponse refreshAuthToken(final String refreshToken) {
+  public AuthUser refreshAuthToken(final String refreshToken) {
     final Token token = tokenRepository.findByToken(refreshToken)
         .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
     if (token.isRevoked() || token.isExpired()) {
@@ -77,10 +77,8 @@ public class AuthService {
     final User user = token.getUser();
     userRepository.findByUsername(user.getUsername())
         .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
-    revokeAllUserTokens(user);
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
-    saveUserToken(user, refreshToken);
-    return new AuthUserResponse(
+    return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
         user.getUsername(), user.getRole(), authToken, null
     );
