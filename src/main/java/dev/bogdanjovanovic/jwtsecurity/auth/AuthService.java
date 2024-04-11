@@ -65,9 +65,6 @@ public class AuthService {
     );
   }
 
-//  public AuthUserResponse getCurrentUser() {
-//  }
-
   private void revokeAllUserTokens(final User user) {
     final List<Token> validUserTokens = tokenRepository.findAllValidTokensByUserId(
         user.getUserId());

@@ -35,8 +35,8 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
   @Test
   void whenUnauthenticated_thenShouldReturnUnauthorized() {
-    final ResponseEntity<String> response = restTemplate.exchange("/api/v1/demo", HttpMethod.GET,
-        null, String.class);
+    final ResponseEntity<Void> response = restTemplate.exchange("/api/v1/demo", HttpMethod.GET,
+        null, Void.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
   }
 
@@ -64,7 +64,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),
@@ -74,7 +74,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     assertThat(loginResponse.getBody()).isNotNull();
     assertThat(loginResponse.getBody().getData()).isNotNull();
 
-    final AuthResponse authResponse = loginResponse.getBody().getData();
+    final AuthUserResponse authResponse = loginResponse.getBody().getData();
     final String authToken = authResponse.authToken();
 
     final HttpHeaders headers = new HttpHeaders();
