@@ -4,15 +4,15 @@ import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
+import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -57,11 +57,31 @@ public class AuthService {
         request.username(), request.password()
     ));
     revokeAllUserTokens(user);
-    final String jwtToken = tokenService.generateJwtToken(user);
-    saveUserToken(user, jwtToken);
+    final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
+    final String refreshToken = tokenService.generateJwtToken(user, TokenType.REFRESH);
+    saveUserToken(user, refreshToken);
     return new AuthUserResponse(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-        user.getUsername(), user.getRole(), jwtToken
+        user.getUsername(), user.getRole(), authToken, refreshToken
+    );
+  }
+
+  @Transactional
+  public AuthUserResponse refreshAuthToken(final String refreshToken) {
+    final Token token = tokenRepository.findByToken(refreshToken)
+        .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+    if (token.isRevoked() || token.isExpired()) {
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+    final User user = token.getUser();
+    userRepository.findByUsername(user.getUsername())
+        .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+    revokeAllUserTokens(user);
+    final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
+    saveUserToken(user, refreshToken);
+    return new AuthUserResponse(
+        user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
+        user.getUsername(), user.getRole(), authToken, null
     );
   }
 
@@ -83,7 +103,6 @@ public class AuthService {
   private void saveUserToken(final User user, final String jwtToken) {
     final Token token = new Token(
         jwtToken,
-        TokenType.BEARER,
         false,
         false,
         user

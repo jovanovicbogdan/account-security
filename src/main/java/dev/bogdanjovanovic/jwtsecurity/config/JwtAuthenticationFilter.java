@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
+//@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final TokenService tokenService;
@@ -50,10 +50,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   private boolean authenticateWithToken(final String token) {
-    final String username = tokenService.extractUsername(token);
+    final String subject = tokenService.extractSubject(token);
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (username != null && authentication == null) {
-      final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    if (subject != null && authentication == null) {
+      final UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
       return tokenService.isTokenValid(token, userDetails);
     }
     return false;

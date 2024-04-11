@@ -2,6 +2,7 @@ package dev.bogdanjovanovic.jwtsecurity.auth;
 
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,11 +26,6 @@ public class AuthController {
     this.authService = authService;
   }
 
-  @PostMapping("login")
-  public ApiResponseWrapper<AuthUserResponse> login(@RequestBody @Valid final LoginRequest request) {
-    return new ApiResponseWrapper<>(authService.authenticate(request));
-  }
-
   @PostMapping("register")
   @ResponseStatus(HttpStatus.CREATED)
   public void register(@RequestBody @Valid final RegisterRequest request) {
@@ -37,6 +33,22 @@ public class AuthController {
 //    Cookie cookie = new Cookie("refresh-token", "kirYksalekPgkslkAsnk");
 //    cookie.setHttpOnly(true);
 //    cookie.setSecure(true);
+  }
+
+  @PostMapping("login")
+  public ApiResponseWrapper<AuthUserResponse> login(
+      @RequestBody @Valid final LoginRequest request) {
+    return new ApiResponseWrapper<>(authService.authenticate(request));
+  }
+
+  @PostMapping("refresh-token")
+  public ApiResponseWrapper<AuthUserResponse> refreshToken(
+      @RequestBody @Valid final RefreshToken request) {
+    return new ApiResponseWrapper<>(authService.refreshAuthToken(request.refreshToken()));
+  }
+
+  public record RefreshToken(@NotBlank String refreshToken) {
+
   }
 
 }

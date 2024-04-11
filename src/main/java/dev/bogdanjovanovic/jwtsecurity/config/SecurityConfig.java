@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @EnableWebSecurity
@@ -22,12 +21,9 @@ public class SecurityConfig {
       "/api/v1/auth/**"
   };
   private final LogoutHandler logoutHandler;
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  public SecurityConfig(final LogoutHandler logoutHandler,
-      final JwtAuthenticationFilter jwtAuthenticationFilter) {
+  public SecurityConfig(final LogoutHandler logoutHandler) {
     this.logoutHandler = logoutHandler;
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
   @Bean
@@ -40,7 +36,7 @@ public class SecurityConfig {
         })
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
         .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")
             .addLogoutHandler(logoutHandler)

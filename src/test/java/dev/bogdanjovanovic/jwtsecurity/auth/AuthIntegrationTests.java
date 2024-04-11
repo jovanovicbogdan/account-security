@@ -88,4 +88,35 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     assertThat(demoResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
+  @Test
+  void whenInvalidCredentials_thenShouldReturnUnauthorized() {
+    final String username = "johndoe";
+    final String password = "secretpassword";
+
+    final RegisterRequest registerRequest = new RegisterRequest(
+        "John",
+        "Doe",
+        "johndoe@example.com",
+        username,
+        password
+    );
+
+    final ResponseEntity<Void> registerResponse = restTemplate.exchange(
+        "/api/v1/auth/register",
+        HttpMethod.POST,
+        new HttpEntity<>(registerRequest),
+        Void.class
+    );
+    assertThat(registerResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    final LoginRequest loginRequest = new LoginRequest(username, "invalidpassword");
+
+    final ResponseEntity<Void> loginResponse = restTemplate.exchange(
+        "/api/v1/auth/login",
+        HttpMethod.POST,
+        new HttpEntity<>(loginRequest),
+        Void.class
+    );
+    assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+  }
+
 }

@@ -6,11 +6,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,8 +22,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
   @Id
-  @GeneratedValue
-  private Long userId;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID userId;
 
   @Column(nullable = false, length = 64)
   private String firstName;
@@ -42,7 +44,7 @@ public class User implements UserDetails {
   public User() {
   }
 
-  public User(Long userId, String firstName, String lastName, String email, String username,
+  public User(UUID userId, String firstName, String lastName, String email, String username,
       String passwordHash, Role role, List<Token> tokens) {
     this.userId = userId;
     this.firstName = firstName;
@@ -100,7 +102,7 @@ public class User implements UserDetails {
     return true;
   }
 
-  public Long getUserId() {
+  public UUID getUserId() {
     return userId;
   }
 
@@ -156,7 +158,7 @@ public class User implements UserDetails {
 
   public static class Builder {
 
-    private Long userId;
+    private UUID userId;
     private String firstName;
     private String lastName;
     private String email;
@@ -165,7 +167,7 @@ public class User implements UserDetails {
     private Role role;
     private List<Token> tokens;
 
-    public Builder userId(Long userId) {
+    public Builder userId(UUID userId) {
       this.userId = userId;
       return this;
     }

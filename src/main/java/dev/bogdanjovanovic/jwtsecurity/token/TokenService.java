@@ -1,6 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
 import dev.bogdanjovanovic.jwtsecurity.auth.User;
+import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
@@ -27,22 +28,27 @@ public class TokenService {
     this.tokenRepository = tokenRepository;
   }
 
-  public String generateJwtToken(final User user) {
+  public String generateJwtToken(final User user, final TokenType tokenType) {
     final Instant now = Instant.now();
+    Instant expiresAt = now.plus(1L, ChronoUnit.MINUTES);
+    if (TokenType.REFRESH.equals(tokenType)) {
+      expiresAt = now.plus(14L, ChronoUnit.DAYS);
+    }
     final String scope = user.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.joining(" "));
     final JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuer("self")
         .issuedAt(now)
-        .expiresAt(now.plus(15L, ChronoUnit.MINUTES))
+        .expiresAt(expiresAt)
         .subject(user.getUsername())
         .claim("scope", scope)
+        .claim("type", tokenType.name())
         .build();
     return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
   }
 
-  public String extractUsername(final String token) {
+  public String extractSubject(final String token) {
     final Jwt jwt = jwtDecoder.decode(token);
     return jwt.getSubject();
   }
@@ -53,9 +59,9 @@ public class TokenService {
   }
 
   public boolean isTokenValid(final String token, final UserDetails userDetails) {
-    final String username = extractUsername(token);
+    final String subject = extractSubject(token);
     return tokenRepository.findByToken(token)
-        .map(t -> (username.equals(userDetails.getUsername())) && !isTokenExpired(token)
+        .map(t -> (subject.equals(userDetails.getUsername())) && !isTokenExpired(token)
             && !t.isRevoked())
         .orElse(false);
   }
