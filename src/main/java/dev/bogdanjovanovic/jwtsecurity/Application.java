@@ -4,6 +4,7 @@ import dev.bogdanjovanovic.jwtsecurity.auth.User;
 import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.config.RsaKeyProperties;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenProperties;
 import java.util.Collections;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableJpaAuditing
-@EnableConfigurationProperties(RsaKeyProperties.class)
+@EnableConfigurationProperties({RsaKeyProperties.class, TokenProperties.class})
 @SpringBootApplication
 public class Application {
 

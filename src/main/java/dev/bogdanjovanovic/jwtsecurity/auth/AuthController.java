@@ -6,11 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -45,7 +41,7 @@ public class AuthController {
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
     log.info("Received login request for user: {}", request.username());
     final AuthUser authUser = authService.authenticate(request);
-    final Cookie cookie = new Cookie("refresh-token", authUser.refreshToken());
+    final Cookie cookie = new Cookie("refreshToken", authUser.refreshToken());
     cookie.setHttpOnly(true);
 //    cookie.setSecure(true);
     response.addCookie(cookie);
@@ -55,10 +51,10 @@ public class AuthController {
     );
   }
 
-  @PostMapping("refresh-token")
+  @PostMapping("refresh")
   public ApiResponseWrapper<AuthUserResponse> refreshToken(final HttpServletRequest request) {
     final Cookie refreshTokenCookie = Arrays.stream(request.getCookies())
-        .filter(cookie -> cookie.getName().equals("refresh-token"))
+        .filter(cookie -> "refreshToken".equals(cookie.getName()))
         .findFirst()
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final AuthUser authUser = authService.refreshAuthToken(refreshTokenCookie.getValue());

@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -20,19 +19,22 @@ public class TokenService {
   private final JwtEncoder jwtEncoder;
   private final JwtDecoder jwtDecoder;
   private final TokenRepository tokenRepository;
+  private final TokenProperties tokenProperties;
 
   public TokenService(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
-      final TokenRepository tokenRepository) {
+      final TokenRepository tokenRepository, final TokenProperties tokenProperties) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
     this.tokenRepository = tokenRepository;
+    this.tokenProperties = tokenProperties;
   }
 
   public String generateJwtToken(final User user, final TokenType tokenType) {
-    final Instant now = Instant.now();
-    Instant expiresAt = now.plus(1L, ChronoUnit.MINUTES);
+    // Subtract 60 seconds from the expiration time to account for default clock skew in JwtTimestampValidator
+    final Instant now = Instant.now().minusSeconds(60L);
+    Instant expiresAt = now.plus(tokenProperties.authTokenExpiration(), ChronoUnit.MILLIS);
     if (TokenType.REFRESH.equals(tokenType)) {
-      expiresAt = now.plus(14L, ChronoUnit.DAYS);
+      expiresAt = now.plus(tokenProperties.refreshTokenExpiration(), ChronoUnit.MILLIS);
     }
     final String scope = user.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
@@ -40,6 +42,7 @@ public class TokenService {
     final JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuer("self")
         .issuedAt(now)
+        .notBefore(now)
         .expiresAt(expiresAt)
         .subject(user.getUsername())
         .claim("scope", scope)
@@ -58,10 +61,18 @@ public class TokenService {
     return jwt.getExpiresAt();
   }
 
-  public boolean isTokenValid(final String token, final UserDetails userDetails) {
-    final String subject = extractSubject(token);
+  public TokenType extractTokenType(final String token) {
+    final Jwt jwt = jwtDecoder.decode(token);
+    return TokenType.valueOf(jwt.getClaimAsString("type"));
+  }
+
+  public boolean isTokenValid(final String token, final String subject,
+      final TokenType tokenType) {
+    final String subjectClaim = extractSubject(token);
+    final String tokenTypeClaim = extractTokenType(token).name();
     return tokenRepository.findByToken(token)
-        .map(t -> (subject.equals(userDetails.getUsername())) && !isTokenExpired(token)
+        .map(t -> (subjectClaim.equals(subject)) && !isTokenExpired(token)
+            && (tokenTypeClaim.equals(tokenType.name()))
             && !t.isRevoked())
         .orElse(false);
   }

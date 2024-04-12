@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -38,6 +39,8 @@ public class Token {
   private Instant createdAt;
   @LastModifiedDate
   private Instant updatedAt;
+  @Transient
+  private TokenType tokenType;
 
   public Token() {
   }
@@ -71,6 +74,10 @@ public class Token {
 
   public void setRevoked(boolean revoked) {
     isRevoked = revoked;
+  }
+
+  public String getToken() {
+    return token;
   }
 
   public User getUser() {
