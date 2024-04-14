@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -51,7 +50,7 @@ public class AuthController {
   }
 
   @PostMapping("login")
-  public ApiResponseWrapper<Object> login(
+  public ApiResponseWrapper<AuthUserResponse> login(
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
     log.info("Received login request for user: {}", request.username());
     final AuthUser authUser = authService.authenticate(request);
@@ -76,7 +75,7 @@ public class AuthController {
     final Cookie refreshTokenCookie = Arrays.stream(request.getCookies())
         .filter(cookie -> REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName()))
         .findFirst()
-        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
+        .orElseThrow(() -> new UnauthorizedException("no cookie"));
     final AuthUser authUser = authService.refreshAuthToken(refreshTokenCookie.getValue());
     return new ApiResponseWrapper<>(
         new AuthUserResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
@@ -93,12 +92,11 @@ public class AuthController {
       throw new UnauthorizedException("Logout failed");
     }
     final Cookie refreshTokenCookie = Arrays.stream(request.getCookies())
-        .filter(cookie -> cookie.getName().equals(AuthController.REFRESH_TOKEN_COOKIE_NAME))
+        .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN_COOKIE_NAME))
         .findFirst()
         .orElseThrow(() -> new BadRequestException("Invalid refresh token"));
     final Token storedToken = tokenRepository.findByToken(refreshTokenCookie.getValue())
         .orElseThrow(() -> new BadRequestException("Logout failed"));
-    storedToken.setExpired(true);
     storedToken.setRevoked(true);
     tokenRepository.save(storedToken);
     refreshTokenCookie.setHttpOnly(true);

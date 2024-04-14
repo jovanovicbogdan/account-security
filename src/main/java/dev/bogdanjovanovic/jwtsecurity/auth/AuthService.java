@@ -58,8 +58,8 @@ public class AuthService {
         request.username(), request.password()
     ));
     revokeAllUserTokens(user);
-    final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     final String refreshToken = tokenService.generateJwtToken(user, TokenType.REFRESH);
+    final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     saveUserToken(user, refreshToken);
     return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
@@ -70,14 +70,15 @@ public class AuthService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public AuthUser refreshAuthToken(final String refreshToken) {
     final Token token = tokenRepository.findByToken(refreshToken)
-        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
-    if (token.isRevoked() || token.isExpired()) {
-      throw new UnauthorizedException("Authentication failed");
-    }
+        .orElseThrow(() -> new UnauthorizedException("no token in repo"));
     final User user = token.getUser();
-    tokenService.isTokenValid(token.getToken(), user.getUsername(), TokenType.REFRESH);
+    final boolean isTokenValid = tokenService.isTokenValid(token.getToken(), user.getUsername(),
+        TokenType.REFRESH);
+    if (token.isRevoked() || !isTokenValid) {
+      throw new UnauthorizedException("invalid token");
+    }
     userRepository.findByUsername(user.getUsername())
-        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
+        .orElseThrow(() -> new UnauthorizedException("user not found"));
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
@@ -92,10 +93,7 @@ public class AuthService {
       return;
     }
 
-    validUserTokens.forEach(token -> {
-      token.setRevoked(true);
-      token.setExpired(true);
-    });
+    validUserTokens.forEach(token -> token.setRevoked(true));
 
     tokenRepository.saveAll(validUserTokens);
   }
@@ -103,7 +101,6 @@ public class AuthService {
   private void saveUserToken(final User user, final String jwtToken) {
     final Token token = new Token(
         jwtToken,
-        false,
         false,
         user
     );

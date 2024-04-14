@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import dev.bogdanjovanovic.jwtsecurity.AbstractTestcontainers;
 import dev.bogdanjovanovic.jwtsecurity.demo.DemoController.DemoResponse;
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenProperties;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Objects;
@@ -35,9 +36,12 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
   @Autowired
   private TestRestTemplate restTemplate;
 
+  @Autowired
+  private TokenProperties tokenProperties;
+
   @Test
   void whenUnauthenticated_thenShouldReturnUnauthorized() {
-    final ResponseEntity<Void> response = restTemplate.exchange("/api/v1/demo", HttpMethod.GET,
+    final ResponseEntity<Void> response = restTemplate.exchange("/api/v1/private/demo", HttpMethod.GET,
         null, Void.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
   }
@@ -88,7 +92,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     final HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", String.format("Bearer %s", authToken));
     final ResponseEntity<ApiResponseWrapper<DemoResponse>> demoResponse = restTemplate.exchange(
-        "/api/v1/demo",
+        "/api/v1/private/demo",
         HttpMethod.GET,
         new HttpEntity<>(headers),
         new ParameterizedTypeReference<>() {
@@ -289,7 +293,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     assertThat(authResponse.email()).isEqualTo(email);
 
     // Sleep for 1 second to ensure the new token is different
-    Thread.sleep(1000);
+//    Thread.sleep(1000);
 
     final HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.COOKIE,
@@ -359,7 +363,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     headers.add("Authorization", String.format("Bearer %s", authResponse.authToken()));
 
     final ResponseEntity<ApiResponseWrapper<DemoResponse>> demoResponse = restTemplate.exchange(
-        "/api/v1/demo",
+        "/api/v1/private/demo",
         HttpMethod.GET,
         new HttpEntity<>(headers),
         new ParameterizedTypeReference<>() {
@@ -367,10 +371,10 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     );
     assertThat(demoResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    Thread.sleep(2500);
+    Thread.sleep(tokenProperties.authTokenExpiration() + 10L);
 
     final ResponseEntity<ApiResponseWrapper<DemoResponse>> demoResponse2 = restTemplate.exchange(
-        "/api/v1/demo",
+        "/api/v1/private/demo",
         HttpMethod.GET,
         new HttpEntity<>(headers),
         new ParameterizedTypeReference<>() {

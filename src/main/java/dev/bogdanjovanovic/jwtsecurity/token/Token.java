@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
@@ -28,8 +27,8 @@ public class Token {
   private UUID tokenId;
   @Column(nullable = false, unique = true, columnDefinition = "text")
   private String token;
-  @Column(nullable = false)
-  private boolean isExpired = false;
+//  @Column(nullable = false)
+//  private boolean isExpired = false;
   @Column(nullable = false)
   private boolean isRevoked = false;
   @ManyToOne
@@ -45,31 +44,21 @@ public class Token {
   public Token() {
   }
 
-  public Token(UUID tokenId, String token, boolean isExpired, boolean isRevoked, User user) {
+  public Token(UUID tokenId, String token, boolean isRevoked, User user) {
     this.tokenId = tokenId;
     this.token = token;
-    this.isExpired = isExpired;
     this.isRevoked = isRevoked;
     this.user = user;
   }
 
-  public Token(String token, boolean isExpired, boolean isRevoked, User user) {
+  public Token(String token, boolean isRevoked, User user) {
     this.token = token;
-    this.isExpired = isExpired;
     this.isRevoked = isRevoked;
     this.user = user;
-  }
-
-  public boolean isExpired() {
-    return isExpired;
   }
 
   public boolean isRevoked() {
     return isRevoked;
-  }
-
-  public void setExpired(boolean expired) {
-    isExpired = expired;
   }
 
   public void setRevoked(boolean revoked) {

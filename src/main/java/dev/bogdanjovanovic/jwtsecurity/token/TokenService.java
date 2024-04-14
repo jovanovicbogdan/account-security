@@ -18,14 +18,12 @@ public class TokenService {
 
   private final JwtEncoder jwtEncoder;
   private final JwtDecoder jwtDecoder;
-  private final TokenRepository tokenRepository;
   private final TokenProperties tokenProperties;
 
   public TokenService(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
-      final TokenRepository tokenRepository, final TokenProperties tokenProperties) {
+      final TokenProperties tokenProperties) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
-    this.tokenRepository = tokenRepository;
     this.tokenProperties = tokenProperties;
   }
 
@@ -70,11 +68,10 @@ public class TokenService {
       final TokenType tokenType) {
     final String subjectClaim = extractSubject(token);
     final String tokenTypeClaim = extractTokenType(token).name();
-    return tokenRepository.findByToken(token)
-        .map(t -> (subjectClaim.equals(subject)) && !isTokenExpired(token)
-            && (tokenTypeClaim.equals(tokenType.name()))
-            && !t.isRevoked())
-        .orElse(false);
+    final boolean isExpired = Instant.now().isAfter(extractExpiration(token));
+    return subjectClaim.equals(subject)
+        && tokenTypeClaim.equals(tokenType.name())
+        && isExpired;
   }
 
   public boolean isTokenExpired(final String token) {
