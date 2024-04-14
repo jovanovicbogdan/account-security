@@ -5,9 +5,12 @@ import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +18,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
@@ -66,6 +71,18 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
       final UnauthorizedException ex,
       final HttpServletRequest request) {
+    log.info("Unauthorized access attempted: {}", ex.getMessage());
+    final ApiResponse response = new ApiResponse(request.getRequestURI(),
+        ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
+        LocalDateTime.now());
+    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(JwtValidationException.class)
+  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+      final JwtValidationException ex,
+      final HttpServletRequest request) {
+    log.info(ex.getMessage());
     final ApiResponse response = new ApiResponse(request.getRequestURI(),
         ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
         LocalDateTime.now());
@@ -76,6 +93,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
       final BadCredentialsException ex,
       final HttpServletRequest request) {
+    log.info("Bad credentials: {}", ex.getMessage());
     final ApiResponse response = new ApiResponse(request.getRequestURI(),
         "Authentication failed", HttpStatus.UNAUTHORIZED.value(),
         LocalDateTime.now());

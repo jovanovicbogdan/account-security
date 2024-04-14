@@ -225,7 +225,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.COOKIE,
-        String.format("refreshToken=%s", refreshTokenCookie.getValue()));
+        String.format("%s=%s", AuthController.REFRESH_TOKEN_COOKIE_NAME, refreshTokenCookie.getValue()));
     final ResponseEntity<Void> logoutResponse = restTemplate.exchange(
         "/api/v1/auth/logout",
         HttpMethod.POST,
@@ -293,7 +293,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.COOKIE,
-        String.format("refreshToken=%s", refreshTokenCookie.getValue()));
+        String.format("%s=%s", AuthController.REFRESH_TOKEN_COOKIE_NAME, refreshTokenCookie.getValue()));
     final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> refreshTokenResponse = restTemplate.exchange(
         "/api/v1/auth/refresh",
         HttpMethod.POST,
@@ -383,7 +383,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     return Arrays.stream(Objects.requireNonNull(
             response.getHeaders().get(HttpHeaders.SET_COOKIE)).toArray())
         .map(Object::toString)
-        .filter(header -> header.startsWith("refreshToken"))
+        .filter(header -> header.startsWith(AuthController.REFRESH_TOKEN_COOKIE_NAME))
         .map(header -> {
           final String[] parts = header.split(";");
           final String[] cookieParts = parts[0].split("=");
