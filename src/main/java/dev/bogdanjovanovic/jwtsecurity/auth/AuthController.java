@@ -97,19 +97,16 @@ public class AuthController {
         .findFirst()
         .orElseThrow(() -> new BadRequestException("Invalid refresh token"));
     final Token storedToken = tokenRepository.findByToken(refreshTokenCookie.getValue())
-        .orElse(null);
-    if (storedToken != null) {
-      storedToken.setExpired(true);
-      storedToken.setRevoked(true);
-      tokenRepository.save(storedToken);
-//      final Cookie cookie = new Cookie(AuthController.REFRESH_TOKEN_COOKIE_NAME, "");
-      refreshTokenCookie.setHttpOnly(true);
-      refreshTokenCookie.setPath("/");
-      refreshTokenCookie.setMaxAge(0);
-      refreshTokenCookie.setAttribute("SameSite", "Strict");
-      response.addCookie(refreshTokenCookie);
-      SecurityContextHolder.clearContext();
-    }
+        .orElseThrow(() -> new BadRequestException("Logout failed"));
+    storedToken.setExpired(true);
+    storedToken.setRevoked(true);
+    tokenRepository.save(storedToken);
+    refreshTokenCookie.setHttpOnly(true);
+    refreshTokenCookie.setPath("/");
+    refreshTokenCookie.setMaxAge(0);
+    refreshTokenCookie.setAttribute("SameSite", "Strict");
+    response.addCookie(refreshTokenCookie);
+    SecurityContextHolder.clearContext();
   }
 
 }
