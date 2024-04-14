@@ -36,7 +36,6 @@ public class SecurityConfig {
         })
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
         .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")
             .addLogoutHandler(logoutHandler)

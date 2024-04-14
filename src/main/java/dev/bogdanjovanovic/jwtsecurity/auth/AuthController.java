@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = {"http://localhost:4200"})
+@CrossOrigin(origins = {"http://localhost:4200"}, allowCredentials = "true")
 public class AuthController {
 
   private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -43,6 +43,8 @@ public class AuthController {
     final AuthUser authUser = authService.authenticate(request);
     final Cookie cookie = new Cookie("refreshToken", authUser.refreshToken());
     cookie.setHttpOnly(true);
+    cookie.setPath("/api");
+    cookie.setAttribute("SameSite", "Strict");
 //    cookie.setSecure(true);
     response.addCookie(cookie);
     return new ApiResponseWrapper<>(

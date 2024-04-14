@@ -29,12 +29,14 @@ public class Application {
   CommandLineRunner commandLineRunner(final UserRepository userRepository,
       final PasswordEncoder passwordEncoder) {
     return (args) -> {
+      if (!userRepository.findAll().isEmpty()) return;
+
       final User user = new User(
           "John",
           "Doe",
-          "johndoe@example.com",
-          "johndoe",
-          passwordEncoder.encode("johndoe"),
+          "admin@example.com",
+          "admin",
+          passwordEncoder.encode("secretpassword"),
           Role.ADMIN,
           Collections.emptyList()
       );
