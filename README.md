@@ -26,3 +26,4 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out priv
 
 - [ ] Spring Boot Logging
 - [ ] Liquibase Database Migrations
+- [ ] Use different approach when testing expiration of auth and refresh token

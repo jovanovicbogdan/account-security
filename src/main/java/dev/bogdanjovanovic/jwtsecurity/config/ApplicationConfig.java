@@ -8,6 +8,9 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,8 +18,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
@@ -32,9 +38,19 @@ public class ApplicationConfig {
     this.userRepository = userRepository;
   }
 
+  public JwtTimestampValidator jwtTimestampValidator() {
+    return new JwtTimestampValidator(Duration.of(0L, ChronoUnit.SECONDS));
+  }
+
   @Bean
   public JwtDecoder jwtDecoder() {
-    return NimbusJwtDecoder.withPublicKey(rsaKeyProperties.rsaPublicKey()).build();
+    final DelegatingOAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
+        Collections.singletonList(jwtTimestampValidator()));
+    final NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder
+        .withPublicKey(rsaKeyProperties.rsaPublicKey())
+        .build();
+    jwtDecoder.setJwtValidator(validator);
+    return jwtDecoder;
   }
 
   @Bean

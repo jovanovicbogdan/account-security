@@ -293,7 +293,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     assertThat(authResponse.email()).isEqualTo(email);
 
     // Sleep for 1 second to ensure the new token is different
-//    Thread.sleep(1000);
+    Thread.sleep(1000);
 
     final HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.COOKIE,

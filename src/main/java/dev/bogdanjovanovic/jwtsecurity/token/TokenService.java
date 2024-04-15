@@ -28,8 +28,7 @@ public class TokenService {
   }
 
   public String generateJwtToken(final User user, final TokenType tokenType) {
-    // Subtract 60 seconds from the expiration time to account for default clock skew in JwtTimestampValidator
-    final Instant now = Instant.now().minusSeconds(60L);
+    final Instant now = Instant.now();
     Instant expiresAt = now.plus(tokenProperties.authTokenExpiration(), ChronoUnit.MILLIS);
     if (TokenType.REFRESH.equals(tokenType)) {
       expiresAt = now.plus(tokenProperties.refreshTokenExpiration(), ChronoUnit.MILLIS);
@@ -40,7 +39,6 @@ public class TokenService {
     final JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuer("self")
         .issuedAt(now)
-        .notBefore(now)
         .expiresAt(expiresAt)
         .subject(user.getUsername())
         .claim("scope", scope)
@@ -68,10 +66,9 @@ public class TokenService {
       final TokenType tokenType) {
     final String subjectClaim = extractSubject(token);
     final String tokenTypeClaim = extractTokenType(token).name();
-    final boolean isExpired = Instant.now().isAfter(extractExpiration(token));
     return subjectClaim.equals(subject)
         && tokenTypeClaim.equals(tokenType.name())
-        && isExpired;
+        && !isTokenExpired(token);
   }
 
   public boolean isTokenExpired(final String token) {
