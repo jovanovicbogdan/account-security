@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3"
 
 services:
   db:
@@ -9,8 +9,8 @@ services:
       POSTGRES_PASSWORD: rootpassword
       POSTGRES_DB: jwt_security
       PGDATA: /var/lib/postgresql/data/pgdata
-#    volumes:
-#      - db:/var/lib/postgresql/data
+    #    volumes:
+    #      - db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
@@ -30,6 +30,5 @@ networks:
   jwtsecuritynetwork:
     name: jwtsecuritynetwork
     driver: bridge
-
 #volumes:
 #  db:
