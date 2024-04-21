@@ -47,6 +47,17 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+      final BadRequestException ex,
+      final HttpServletRequest request) {
+    log.info("Bad request: {}", ex.getMessage());
+    final ApiResponse response = new ApiResponse(request.getRequestURI(),
+        ex.getMessage(), HttpStatus.BAD_REQUEST.value(),
+        LocalDateTime.now());
+    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
       final NoResourceFoundException ex,
