@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,6 +40,7 @@ public class User implements UserDetails {
   private String email;
   @Column(unique = true, nullable = false, length = 64)
   private String username;
+  @Transient
   @Column(nullable = false)
   private String passwordHash;
   @Enumerated(EnumType.STRING)
@@ -130,6 +132,14 @@ public class User implements UserDetails {
 
   public Role getRole() {
     return role;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
   }
 
   public enum Role {
