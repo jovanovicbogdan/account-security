@@ -11,8 +11,8 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
   private static final String[] WHITE_LIST_URL = {
