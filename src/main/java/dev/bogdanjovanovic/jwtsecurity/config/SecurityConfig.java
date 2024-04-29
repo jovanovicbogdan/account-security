@@ -1,6 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
 import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,9 +21,12 @@ public class SecurityConfig {
   private static final String[] WHITE_LIST_URL = {
       "/api/v1/auth/**"
   };
+  private final TokenAuthenticationFilter tokenAuthenticationFilter;
   private final TokenAuthProvider tokenAuthProvider;
 
-  public SecurityConfig(final TokenAuthProvider tokenAuthProvider) {
+  public SecurityConfig(final TokenAuthenticationFilter tokenAuthenticationFilter,
+      final TokenAuthProvider tokenAuthProvider) {
+    this.tokenAuthenticationFilter = tokenAuthenticationFilter;
     this.tokenAuthProvider = tokenAuthProvider;
   }
 
@@ -36,7 +41,9 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .addFilterBefore(tokenAuthenticationFilter, BearerTokenAuthenticationFilter.class)
         .authenticationProvider(tokenAuthProvider)
+//        .exceptionHandling(Customizer.withDefaults())
 //        .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")
 //            .addLogoutHandler(logoutHandler)
 //            .logoutSuccessHandler(

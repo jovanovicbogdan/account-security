@@ -76,10 +76,11 @@ public class TokenService {
     final Role roleClaim = extractRole(token);
     return subjectClaim.equals(subject)
         && tokenTypeClaim.equals(tokenType.name())
-        && !isTokenExpired(token) && roleClaim.equals(role);
+        && !isTokenExpired(token)
+        && roleClaim.equals(role);
   }
 
-  public boolean isTokenExpired(final String token) {
+  private boolean isTokenExpired(final String token) {
     return extractExpiration(token).isBefore(Instant.now());
   }
 }

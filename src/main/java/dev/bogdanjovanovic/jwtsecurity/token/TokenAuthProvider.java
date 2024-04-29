@@ -1,5 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
+import dev.bogdanjovanovic.jwtsecurity.auth.User;
+import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import org.slf4j.Logger;
@@ -8,7 +10,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -25,25 +26,30 @@ public class TokenAuthProvider implements AuthenticationProvider {
 
   private final JwtDecoder jwtDecoder;
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
+  private final TokenService tokenService;
+  private final UserRepository userRepository;
 
   public TokenAuthProvider(final JwtDecoder jwtDecoder,
-      final JwtAuthenticationConverter jwtAuthenticationConverter) {
+      final JwtAuthenticationConverter jwtAuthenticationConverter,
+      final TokenService tokenService, final UserRepository userRepository) {
     this.jwtDecoder = jwtDecoder;
     this.jwtAuthenticationConverter = jwtAuthenticationConverter;
+    this.tokenService = tokenService;
+    this.userRepository = userRepository;
   }
 
   @Override
-  public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(final Authentication authentication)
+      throws UnauthorizedException {
     final BearerTokenAuthenticationToken bearer = (BearerTokenAuthenticationToken) authentication;
     final Jwt jwt = getJwt(bearer);
-    final String tokenTypeClaim = jwt.getClaim(ClaimNames.TYPE);
-    if (!TokenType.AUTH.name().equals(tokenTypeClaim)) {
-      log.debug("Authentication failed. Invalid token type.");
-      throw new UnauthorizedException("Authentication failed");
-    }
-    final String roleClaim = jwt.getClaim(ClaimNames.ROLE);
-    if (roleClaim == null) {
-      log.debug("Authentication failed. Missing role claim.");
+    final String subjectClaim = jwt.getSubject();
+    final User user = userRepository.findByUsername(subjectClaim)
+        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
+    final boolean isTokenValid = tokenService.isTokenValid(jwt.getTokenValue(), subjectClaim,
+        TokenType.AUTH, user.getRole());
+    if (!isTokenValid) {
+      log.debug("Authentication failed. Invalid token.");
       throw new UnauthorizedException("Authentication failed");
     }
     final AbstractAuthenticationToken token = jwtAuthenticationConverter.convert(jwt);
@@ -61,12 +67,10 @@ public class TokenAuthProvider implements AuthenticationProvider {
   private Jwt getJwt(final BearerTokenAuthenticationToken bearer) {
     try {
       return jwtDecoder.decode(bearer.getToken());
-    }
-    catch (BadJwtException failed) {
+    } catch (BadJwtException failed) {
       log.debug("Authentication failed. Invalid JWT.");
       throw new InvalidBearerTokenException(failed.getMessage(), failed);
-    }
-    catch (JwtException failed) {
+    } catch (JwtException failed) {
       throw new AuthenticationServiceException(failed.getMessage(), failed);
     }
   }

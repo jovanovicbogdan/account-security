@@ -1,11 +1,17 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
-import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponse;
+import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,10 +19,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-  private final TokenService tokenService;
+  private static final Logger log = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
 
-  public TokenAuthenticationFilter(final TokenService tokenService) {
-    this.tokenService = tokenService;
+  private final ObjectMapper objectMapper;
+
+  public TokenAuthenticationFilter(final ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -24,37 +32,37 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       @NonNull final HttpServletRequest request,
       @NonNull final HttpServletResponse response,
       @NonNull final FilterChain filterChain) throws ServletException, IOException {
-    final String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    final String path = request.getRequestURI();
+
+    if (path.contains("auth")) {
       filterChain.doFilter(request, response);
       return;
     }
-    final String token = authHeader.substring(7);
-    final TokenType tokenType = tokenService.extractTokenType(token);
-    if (TokenType.AUTH.equals(tokenType)) {
-      filterChain.doFilter(request, response);
-    } else {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+    final String authHeader = request.getHeader("Authorization");
+
+    try {
+
+      if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        filterChain.doFilter(request, response);
+      } else {
+        log.debug("Authentication failed. No token provided.");
+        returnUnauthorized(response, path);
+      }
+    } catch (final Exception e) {
+      log.debug("Authentication failed. Invalid token.");
+      returnUnauthorized(response, path);
     }
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//    try {
-//      if (authenticateWithToken(token)) {
-//        filterChain.doFilter(request, response);
-//      } else {
-//        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//      }
-//    } catch (Exception e) {
-//      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//    }
   }
 
-//  private boolean authenticateWithToken(final String token) {
-//    final String subject = tokenService.extractSubject(token);
-//    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//    if (subject != null && authentication == null) {
-//      final UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
-//      return tokenService.isTokenValid(token, userDetails);
-//    }
-//    return false;
-//  }
+  private void returnUnauthorized(@NonNull final HttpServletResponse response,
+      final String path) throws IOException {
+    final ApiResponse apiResponse = new ApiResponse(path, "Authentication failed",
+        HttpServletResponse.SC_UNAUTHORIZED, LocalDateTime.now());
+    final ApiResponseWrapper<ApiResponse> apiResponseWrapper = new ApiResponseWrapper<>(apiResponse);
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.getWriter().write(objectMapper.writeValueAsString(apiResponseWrapper));
+  }
+
 }
