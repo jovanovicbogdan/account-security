@@ -1,7 +1,6 @@
-package dev.bogdanjovanovic.jwtsecurity.config;
+package dev.bogdanjovanovic.jwtsecurity.token;
 
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
-import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,11 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private final TokenService tokenService;
 
-  public JwtAuthenticationFilter(final TokenService tokenService) {
+  public TokenAuthenticationFilter(final TokenService tokenService) {
     this.tokenService = tokenService;
   }
 

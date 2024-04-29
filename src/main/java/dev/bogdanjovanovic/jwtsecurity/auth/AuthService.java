@@ -70,15 +70,15 @@ public class AuthService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public AuthUser refreshAuthToken(final String refreshToken) {
     final Token token = tokenRepository.findByToken(refreshToken)
-        .orElseThrow(() -> new UnauthorizedException("no token in repo"));
+        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final User user = token.getUser();
     final boolean isTokenValid = tokenService.isTokenValid(token.getToken(), user.getUsername(),
-        TokenType.REFRESH);
+        TokenType.REFRESH, user.getRole());
     if (token.isRevoked() || !isTokenValid) {
-      throw new UnauthorizedException("invalid token");
+      throw new UnauthorizedException("Authentication failed");
     }
     userRepository.findByUsername(user.getUsername())
-        .orElseThrow(() -> new UnauthorizedException("user not found"));
+        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),

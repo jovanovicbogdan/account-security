@@ -1,5 +1,7 @@
-package dev.bogdanjovanovic.jwtsecurity.auth;
+package dev.bogdanjovanovic.jwtsecurity.token;
 
+import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
+import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -17,14 +19,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtAuthenticationProvider implements AuthenticationProvider {
+public class TokenAuthProvider implements AuthenticationProvider {
 
-  private final Logger log = LoggerFactory.getLogger(JwtAuthenticationProvider.class);
+  private final Logger log = LoggerFactory.getLogger(TokenAuthProvider.class);
 
   private final JwtDecoder jwtDecoder;
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
-  public JwtAuthenticationProvider(final JwtDecoder jwtDecoder,
+  public TokenAuthProvider(final JwtDecoder jwtDecoder,
       final JwtAuthenticationConverter jwtAuthenticationConverter) {
     this.jwtDecoder = jwtDecoder;
     this.jwtAuthenticationConverter = jwtAuthenticationConverter;
@@ -34,6 +36,16 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
   public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
     final BearerTokenAuthenticationToken bearer = (BearerTokenAuthenticationToken) authentication;
     final Jwt jwt = getJwt(bearer);
+    final String tokenTypeClaim = jwt.getClaim(ClaimNames.TYPE);
+    if (!TokenType.AUTH.name().equals(tokenTypeClaim)) {
+      log.debug("Authentication failed. Invalid token type.");
+      throw new UnauthorizedException("Authentication failed");
+    }
+    final String roleClaim = jwt.getClaim(ClaimNames.ROLE);
+    if (roleClaim == null) {
+      log.debug("Authentication failed. Missing role claim.");
+      throw new UnauthorizedException("Authentication failed");
+    }
     final AbstractAuthenticationToken token = jwtAuthenticationConverter.convert(jwt);
     if (token.getDetails() == null) {
       token.setDetails(bearer.getDetails());

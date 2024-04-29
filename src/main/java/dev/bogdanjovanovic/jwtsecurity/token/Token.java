@@ -27,8 +27,6 @@ public class Token {
   private UUID tokenId;
   @Column(nullable = false, unique = true, columnDefinition = "text")
   private String token;
-//  @Column(nullable = false)
-//  private boolean isExpired = false;
   @Column(nullable = false)
   private boolean isRevoked = false;
   @ManyToOne

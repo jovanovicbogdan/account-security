@@ -1,5 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
+import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -18,6 +19,11 @@ public class SecurityConfig {
   private static final String[] WHITE_LIST_URL = {
       "/api/v1/auth/**"
   };
+  private final TokenAuthProvider tokenAuthProvider;
+
+  public SecurityConfig(final TokenAuthProvider tokenAuthProvider) {
+    this.tokenAuthProvider = tokenAuthProvider;
+  }
 
   @Bean
   public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
@@ -30,6 +36,7 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .authenticationProvider(tokenAuthProvider)
 //        .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")
 //            .addLogoutHandler(logoutHandler)
 //            .logoutSuccessHandler(

@@ -1,6 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
 import dev.bogdanjovanovic.jwtsecurity.auth.User;
+import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,7 +43,8 @@ public class TokenService {
         .expiresAt(expiresAt)
         .subject(user.getUsername())
         .claim("scope", scope)
-        .claim("type", tokenType.name())
+        .claim(ClaimNames.TYPE, tokenType.name())
+        .claim(ClaimNames.ROLE, user.getRole().name())
         .build();
     return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
   }
@@ -59,16 +61,22 @@ public class TokenService {
 
   public TokenType extractTokenType(final String token) {
     final Jwt jwt = jwtDecoder.decode(token);
-    return TokenType.valueOf(jwt.getClaimAsString("type"));
+    return TokenType.valueOf(jwt.getClaimAsString(ClaimNames.TYPE));
+  }
+
+  public Role extractRole(final String token) {
+    final Jwt jwt = jwtDecoder.decode(token);
+    return Role.valueOf(jwt.getClaimAsString(ClaimNames.ROLE));
   }
 
   public boolean isTokenValid(final String token, final String subject,
-      final TokenType tokenType) {
+      final TokenType tokenType, final Role role) {
     final String subjectClaim = extractSubject(token);
     final String tokenTypeClaim = extractTokenType(token).name();
+    final Role roleClaim = extractRole(token);
     return subjectClaim.equals(subject)
         && tokenTypeClaim.equals(tokenType.name())
-        && !isTokenExpired(token);
+        && !isTokenExpired(token) && roleClaim.equals(role);
   }
 
   public boolean isTokenExpired(final String token) {
