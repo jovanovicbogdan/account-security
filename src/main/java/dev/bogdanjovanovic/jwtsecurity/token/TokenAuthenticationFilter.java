@@ -42,7 +42,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     final String authHeader = request.getHeader("Authorization");
 
     try {
-
       if (authHeader != null && authHeader.startsWith("Bearer ")) {
         filterChain.doFilter(request, response);
       } else {
@@ -50,7 +49,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         returnUnauthorized(response, path);
       }
     } catch (final Exception e) {
-      log.debug("Authentication failed. Invalid token.");
+      log.debug(e.getMessage());
       returnUnauthorized(response, path);
     }
   }
