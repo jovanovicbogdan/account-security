@@ -6,7 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
+import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

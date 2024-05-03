@@ -1,12 +1,15 @@
 package dev.bogdanjovanovic.jwtsecurity.auth;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
+import dev.bogdanjovanovic.jwtsecurity.user.AuthUser;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
+import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

@@ -3,8 +3,10 @@ package dev.bogdanjovanovic.jwtsecurity.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.bogdanjovanovic.jwtsecurity.AbstractTestcontainers;
-import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.config.RsaKeyProperties;
+import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

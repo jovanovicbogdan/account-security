@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
 import java.util.Optional;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;

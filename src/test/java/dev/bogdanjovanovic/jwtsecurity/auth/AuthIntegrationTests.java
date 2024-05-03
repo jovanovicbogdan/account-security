@@ -6,6 +6,7 @@ import dev.bogdanjovanovic.jwtsecurity.AbstractTestcontainers;
 import dev.bogdanjovanovic.jwtsecurity.demo.DemoController.DemoResponse;
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenProperties;
+import dev.bogdanjovanovic.jwtsecurity.user.AuthUserResponse;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Objects;

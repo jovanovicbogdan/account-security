@@ -5,6 +5,8 @@ import dev.bogdanjovanovic.jwtsecurity.exception.BadRequestException;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
+import dev.bogdanjovanovic.jwtsecurity.user.AuthUser;
+import dev.bogdanjovanovic.jwtsecurity.user.AuthUserResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

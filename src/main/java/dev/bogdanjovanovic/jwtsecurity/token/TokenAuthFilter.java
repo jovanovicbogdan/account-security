@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class TokenAuthenticationFilter extends OncePerRequestFilter {
+public class TokenAuthFilter extends OncePerRequestFilter {
 
-  private static final Logger log = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
+  private static final Logger log = LoggerFactory.getLogger(TokenAuthFilter.class);
 
   private final ObjectMapper objectMapper;
 
-  public TokenAuthenticationFilter(final ObjectMapper objectMapper) {
+  public TokenAuthFilter(final ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 

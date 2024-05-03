@@ -1,7 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User;
-import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
+import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import org.slf4j.Logger;

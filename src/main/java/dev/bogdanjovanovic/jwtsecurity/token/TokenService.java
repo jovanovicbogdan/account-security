@@ -1,7 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User;
-import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

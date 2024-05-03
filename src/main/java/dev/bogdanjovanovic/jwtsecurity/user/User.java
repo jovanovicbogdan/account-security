@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.auth;
+package dev.bogdanjovanovic.jwtsecurity.user;
 
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import jakarta.persistence.Column;

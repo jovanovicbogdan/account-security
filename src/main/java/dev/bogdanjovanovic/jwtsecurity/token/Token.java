@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

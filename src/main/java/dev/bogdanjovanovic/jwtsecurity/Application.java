@@ -1,8 +1,8 @@
 package dev.bogdanjovanovic.jwtsecurity;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User;
-import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
-import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
+import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.config.RsaKeyProperties;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenProperties;
 import java.util.Collections;

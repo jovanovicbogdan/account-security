@@ -1,9 +1,10 @@
-package dev.bogdanjovanovic.jwtsecurity.auth;
+package dev.bogdanjovanovic.jwtsecurity.user;
 
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, UUID> {
 
   Optional<User> findByUsername(final String username);
 

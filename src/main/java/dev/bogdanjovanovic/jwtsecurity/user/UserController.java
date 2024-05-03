@@ -1,6 +1,5 @@
 package dev.bogdanjovanovic.jwtsecurity.user;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
 import java.util.List;
 import org.springframework.web.bind.annotation.CrossOrigin;

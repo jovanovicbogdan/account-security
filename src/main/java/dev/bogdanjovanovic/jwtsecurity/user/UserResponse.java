@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.user;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.User.Role;
+import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import java.time.Instant;
 import java.util.UUID;
 
