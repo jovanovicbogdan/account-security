@@ -46,6 +46,8 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
+  @Column(nullable = false)
+  private boolean requiresMfa = false;
   @OneToMany(mappedBy = "user")
   private List<Token> tokens;
   @CreatedDate
@@ -57,7 +59,7 @@ public class User implements UserDetails {
   }
 
   public User(UUID userId, String firstName, String lastName, String email, String username,
-      String passwordHash, Role role, List<Token> tokens) {
+      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens) {
     this.userId = userId;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -65,17 +67,19 @@ public class User implements UserDetails {
     this.username = username;
     this.passwordHash = passwordHash;
     this.role = role;
+    this.requiresMfa = requiresMfa;
     this.tokens = tokens;
   }
 
   public User(String firstName, String lastName, String email, String username, String passwordHash,
-      Role role, List<Token> tokens) {
+      Role role, boolean requiresMfa, List<Token> tokens) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
     this.username = username;
     this.passwordHash = passwordHash;
     this.role = role;
+    this.requiresMfa = requiresMfa;
     this.tokens = tokens;
   }
 
@@ -142,20 +146,23 @@ public class User implements UserDetails {
     return updatedAt;
   }
 
+  public boolean requiresMfa() {
+    return requiresMfa;
+  }
+
   public enum Role {
     ADMIN,
     USER
   }
 
-  private User(Builder builder) {
-    this.userId = builder.userId;
+  private User(final Builder builder) {
     this.firstName = builder.firstName;
     this.lastName = builder.lastName;
     this.email = builder.email;
     this.username = builder.username;
     this.passwordHash = builder.passwordHash;
     this.role = builder.role;
-    this.tokens = builder.tokens;
+    this.requiresMfa = builder.requiresMfa;
   }
 
   @Override
@@ -178,52 +185,46 @@ public class User implements UserDetails {
 
   public static class Builder {
 
-    private UUID userId;
     private String firstName;
     private String lastName;
     private String email;
     private String username;
     private String passwordHash;
     private Role role;
-    private List<Token> tokens;
+    private boolean requiresMfa;
 
-    public Builder userId(UUID userId) {
-      this.userId = userId;
-      return this;
-    }
-
-    public Builder firstName(String firstName) {
+    public Builder firstName(final String firstName) {
       this.firstName = firstName;
       return this;
     }
 
-    public Builder lastName(String lastName) {
+    public Builder lastName(final String lastName) {
       this.lastName = lastName;
       return this;
     }
 
-    public Builder email(String email) {
+    public Builder email(final String email) {
       this.email = email;
       return this;
     }
 
-    public Builder username(String username) {
+    public Builder username(final String username) {
       this.username = username;
       return this;
     }
 
-    public Builder passwordHash(String passwordHash) {
+    public Builder passwordHash(final String passwordHash) {
       this.passwordHash = passwordHash;
       return this;
     }
 
-    public Builder role(Role role) {
+    public Builder role(final Role role) {
       this.role = role;
       return this;
     }
 
-    public Builder tokens(List<Token> tokens) {
-      this.tokens = tokens;
+    public Builder requiresMfa(final boolean requiresMfa) {
+      this.requiresMfa = requiresMfa;
       return this;
     }
 

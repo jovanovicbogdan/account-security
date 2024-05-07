@@ -49,6 +49,7 @@ public class AuthService {
         .username(request.username())
         .passwordHash(passwordEncoder.encode(request.password()))
         .role(Role.USER)
+        .requiresMfa(request.requiresMfa())
         .build();
     userRepository.save(user);
   }

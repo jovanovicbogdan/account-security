@@ -40,10 +40,6 @@ public class GoogleAuthenticatorDevice {
     return confirmed;
   }
 
-  public boolean requiresMfa() {
-    return confirmed;
-  }
-
   public boolean isEnabled() {
     return enabled;
   }

@@ -43,7 +43,7 @@ class UserRepositoryTests extends AbstractTestcontainers {
     System.out.println(applicationContext.getBeanDefinitionCount());
     final User user = new User("Bogdan", "Jovanovic",
         "bogdan@example.com", "bjovanovic",
-        "bjovanovic", Role.ADMIN, Collections.emptyList());
+        "bjovanovic", Role.ADMIN, false, Collections.emptyList());
     underTest.save(user);
   }
 

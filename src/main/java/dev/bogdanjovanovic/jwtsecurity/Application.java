@@ -38,6 +38,7 @@ public class Application {
           "admin",
           passwordEncoder.encode("secretpassword"),
           Role.ADMIN,
+          false,
           Collections.emptyList()
       );
       userRepository.save(user);
