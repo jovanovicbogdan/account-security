@@ -1,7 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.bogdanjovanovic.jwtsecurity.mfa.totp.TotpAuthFilter;
+import dev.bogdanjovanovic.jwtsecurity.mfa.otp.OtpAuthFilter;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthFilter;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +24,12 @@ public class SecurityConfig {
       "/api/v1/auth/**"
   };
   private final TokenAuthProvider tokenAuthProvider;
+  private final OtpAuthFilter otpAuthFilter;
 
-  public SecurityConfig(final TokenAuthProvider tokenAuthProvider) {
+  public SecurityConfig(final TokenAuthProvider tokenAuthProvider,
+      final OtpAuthFilter otpAuthFilter) {
     this.tokenAuthProvider = tokenAuthProvider;
+    this.otpAuthFilter = otpAuthFilter;
   }
 
   @Bean
@@ -40,9 +43,8 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-        .addFilterBefore(new TokenAuthFilter(new ObjectMapper()),
-            BearerTokenAuthenticationFilter.class)
-        .addFilterAfter(new TotpAuthFilter(), BearerTokenAuthenticationFilter.class)
+        .addFilterBefore(new TokenAuthFilter(), BearerTokenAuthenticationFilter.class)
+        .addFilterAfter(otpAuthFilter, BearerTokenAuthenticationFilter.class)
         .authenticationProvider(tokenAuthProvider)
 //        .exceptionHandling(Customizer.withDefaults())
 //        .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")

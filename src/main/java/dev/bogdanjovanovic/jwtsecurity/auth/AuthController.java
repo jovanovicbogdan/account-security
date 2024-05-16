@@ -54,6 +54,14 @@ public class AuthController {
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
     log.info("Received login request for user: {}", request.username());
     final AuthUser authUser = authService.authenticate(request);
+    if (authUser.requiresMfa()) {
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      response.setHeader("WWW-Authenticate", "OTP");
+      return new ApiResponseWrapper<>(
+          new AuthResponse(null, null, true,
+              authUser.authToken())
+      );
+    }
     final Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, authUser.refreshToken());
     cookie.setHttpOnly(true);
     cookie.setPath("/");
@@ -62,8 +70,7 @@ public class AuthController {
 //    cookie.setSecure(true);
     response.addCookie(cookie);
     return new ApiResponseWrapper<>(
-        new AuthResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
-            authUser.email(), authUser.username(), authUser.role(), authUser.requiresMfa(),
+        new AuthResponse(authUser.userId(), authUser.username(), false,
             authUser.authToken())
     );
   }
@@ -79,8 +86,7 @@ public class AuthController {
         .orElseThrow(() -> new UnauthorizedException("no cookie"));
     final AuthUser authUser = authService.refreshAuthToken(refreshTokenCookie.getValue());
     return new ApiResponseWrapper<>(
-        new AuthResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
-            authUser.email(), authUser.username(), authUser.role(), authUser.requiresMfa(),
+        new AuthResponse(authUser.userId(), authUser.username(), authUser.requiresMfa(),
             authUser.authToken())
     );
   }

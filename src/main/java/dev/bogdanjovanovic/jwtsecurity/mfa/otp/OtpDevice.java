@@ -1,20 +1,23 @@
-package dev.bogdanjovanovic.jwtsecurity.mfa.totp;
+package dev.bogdanjovanovic.jwtsecurity.mfa.otp;
 
+import dev.bogdanjovanovic.jwtsecurity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "google_authenticator_device")
-public class GoogleAuthenticatorDevice {
+@Table(name = "otp_device")
+public class OtpDevice {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID googleAuthenticatorDeviceId;
+  private UUID otpDeviceId;
   @Column(unique = true, nullable = false)
   private String name;
   @Column(nullable = false)
@@ -23,9 +26,14 @@ public class GoogleAuthenticatorDevice {
   private boolean confirmed;
   @Column(nullable = false)
   private boolean enabled;
+  @OneToOne
+  @JoinColumn(name = "user_id", referencedColumnName = "userId")
+  private User user;
 
-  public UUID getGoogleAuthenticatorDeviceId() {
-    return googleAuthenticatorDeviceId;
+  public OtpDevice() {}
+
+  public UUID getOtpDeviceId() {
+    return otpDeviceId;
   }
 
   public String getName() {

@@ -30,10 +30,7 @@ public class TokenService {
 
   public String generateJwtToken(final User user, final TokenType tokenType) {
     final Instant now = Instant.now();
-    Instant expiresAt = now.plus(tokenProperties.authTokenExpiration(), ChronoUnit.MILLIS);
-    if (TokenType.REFRESH.equals(tokenType)) {
-      expiresAt = now.plus(tokenProperties.refreshTokenExpiration(), ChronoUnit.MILLIS);
-    }
+    final Instant expiresAt = getExpirationByTokenType(tokenType);
     final String scope = user.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.joining(" "));
@@ -82,5 +79,20 @@ public class TokenService {
 
   private boolean isTokenExpired(final String token) {
     return extractExpiration(token).isBefore(Instant.now());
+  }
+
+  private Instant getExpirationByTokenType(final TokenType tokenType) {
+    Instant now = Instant.now();
+    Instant expiresAt = null;
+    if (TokenType.AUTH.equals(tokenType)) {
+      expiresAt = now.plus(tokenProperties.authTokenExpiration(), ChronoUnit.MILLIS);
+    }
+    if (TokenType.REFRESH.equals(tokenType)) {
+      expiresAt = now.plus(tokenProperties.refreshTokenExpiration(), ChronoUnit.MILLIS);
+    }
+    if (TokenType.PRE_AUTH.equals(tokenType)) {
+      expiresAt = now.plus(tokenProperties.preAuthTokenExpiration(), ChronoUnit.MILLIS);
+    }
+    return expiresAt;
   }
 }

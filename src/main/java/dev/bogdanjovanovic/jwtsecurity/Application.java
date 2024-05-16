@@ -29,7 +29,9 @@ public class Application {
   CommandLineRunner commandLineRunner(final UserRepository userRepository,
       final PasswordEncoder passwordEncoder) {
     return (args) -> {
-      if (!userRepository.findAll().isEmpty()) return;
+      if (!userRepository.findAll().isEmpty()) {
+        return;
+      }
 
       final User user = new User(
           "John",
@@ -38,8 +40,9 @@ public class Application {
           "admin",
           passwordEncoder.encode("secretpassword"),
           Role.ADMIN,
-          false,
-          Collections.emptyList()
+          true,
+          Collections.emptyList(),
+          null
       );
       userRepository.save(user);
     };

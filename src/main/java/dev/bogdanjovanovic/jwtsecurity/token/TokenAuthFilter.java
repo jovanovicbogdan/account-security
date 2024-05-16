@@ -1,6 +1,8 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponse;
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
 import jakarta.servlet.FilterChain;
@@ -21,8 +23,10 @@ public class TokenAuthFilter extends OncePerRequestFilter {
 
   private final ObjectMapper objectMapper;
 
-  public TokenAuthFilter(final ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
+  public TokenAuthFilter() {
+    this.objectMapper = new ObjectMapper();
+    this.objectMapper.registerModule(new JavaTimeModule());
+    this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
   }
 
   @Override
@@ -37,7 +41,7 @@ public class TokenAuthFilter extends OncePerRequestFilter {
       return;
     }
 
-    final String authHeader = request.getHeader("Authorization");
+    final String authHeader = request.getHeader("authorization");
 
     try {
       if (authHeader != null && authHeader.startsWith("Bearer ")) {

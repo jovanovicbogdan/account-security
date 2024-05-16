@@ -1,17 +1,21 @@
 package dev.bogdanjovanovic.jwtsecurity.user;
 
+import dev.bogdanjovanovic.jwtsecurity.mfa.otp.OtpDevice;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +53,9 @@ public class User implements UserDetails {
   @Column(nullable = false)
   private boolean requiresMfa = false;
   @OneToMany(mappedBy = "user")
-  private List<Token> tokens;
+  private List<Token> tokens = new ArrayList<>();
+  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+  private OtpDevice otpDevice = new OtpDevice();
   @CreatedDate
   private Instant createdAt;
   @LastModifiedDate
@@ -59,7 +65,7 @@ public class User implements UserDetails {
   }
 
   public User(UUID userId, String firstName, String lastName, String email, String username,
-      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens) {
+      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens, OtpDevice otpDevice) {
     this.userId = userId;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -69,10 +75,11 @@ public class User implements UserDetails {
     this.role = role;
     this.requiresMfa = requiresMfa;
     this.tokens = tokens;
+    this.otpDevice = otpDevice;
   }
 
   public User(String firstName, String lastName, String email, String username, String passwordHash,
-      Role role, boolean requiresMfa, List<Token> tokens) {
+      Role role, boolean requiresMfa, List<Token> tokens, OtpDevice otpDevice) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
@@ -81,6 +88,7 @@ public class User implements UserDetails {
     this.role = role;
     this.requiresMfa = requiresMfa;
     this.tokens = tokens;
+    this.otpDevice = otpDevice;
   }
 
   @Override
@@ -150,6 +158,10 @@ public class User implements UserDetails {
     return requiresMfa;
   }
 
+  public OtpDevice otpDevice() {
+    return otpDevice;
+  }
+
   public enum Role {
     ADMIN,
     USER
@@ -175,7 +187,11 @@ public class User implements UserDetails {
         ", username='" + username + '\'' +
         ", passwordHash='" + passwordHash + '\'' +
         ", role=" + role +
+        ", requiresMfa=" + requiresMfa +
         ", tokens=" + tokens +
+        ", otpDevice=" + otpDevice +
+        ", createdAt=" + createdAt +
+        ", updatedAt=" + updatedAt +
         '}';
   }
 

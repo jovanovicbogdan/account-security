@@ -30,7 +30,7 @@ public class Token {
   @Column(nullable = false)
   private boolean isRevoked = false;
   @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
+  @JoinColumn(name = "user_id", referencedColumnName = "userId", nullable = false)
   private User user;
   @CreatedDate
   private Instant createdAt;
@@ -69,6 +69,19 @@ public class Token {
 
   public User getUser() {
     return user;
+  }
+
+  @Override
+  public String toString() {
+    return "Token{" +
+        "tokenId=" + tokenId +
+        ", token='" + token + '\'' +
+        ", isRevoked=" + isRevoked +
+        ", user=" + user +
+        ", createdAt=" + createdAt +
+        ", updatedAt=" + updatedAt +
+        ", tokenType=" + tokenType +
+        '}';
   }
 
   public enum TokenType {

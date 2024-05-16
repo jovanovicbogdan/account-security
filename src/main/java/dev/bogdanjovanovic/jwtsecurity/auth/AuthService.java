@@ -62,15 +62,15 @@ public class AuthService {
             request.username(), request.password()
         ));
     if (user.requiresMfa()) {
-      // issue pre-auth token and return requiredMfa and the list of two-factor auths available
+      final String preAuthToken = tokenService.generateJwtToken(user, TokenType.PRE_AUTH);
+      return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), preAuthToken,
+          null);
     }
     final String refreshToken = tokenService.generateJwtToken(user, TokenType.REFRESH);
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     saveUserToken(user, refreshToken);
-    return new AuthUser(
-        user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-        user.getUsername(), user.getRole(), user.requiresMfa(), authToken, refreshToken
-    );
+    return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken,
+        refreshToken);
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -86,10 +86,7 @@ public class AuthService {
     userRepository.findByUsername(user.getUsername())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
-    return new AuthUser(
-        user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-        user.getUsername(), user.getRole(), user.requiresMfa(), authToken, null
-    );
+    return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken, null);
   }
 
   private void revokeAllUserTokens(final User user) {
