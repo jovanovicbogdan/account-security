@@ -72,6 +72,7 @@ public class Token {
   }
 
   public enum TokenType {
+    PRE_AUTH,
     AUTH,
     REFRESH
   }

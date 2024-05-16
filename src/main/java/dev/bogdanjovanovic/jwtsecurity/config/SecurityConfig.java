@@ -1,8 +1,9 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.bogdanjovanovic.jwtsecurity.mfa.totp.TotpAuthFilter;
-import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthFilter;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -14,23 +15,17 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
   private static final String[] WHITE_LIST_URL = {
       "/api/v1/auth/**"
   };
-  private final TokenAuthFilter tokenAuthFilter;
-  private final TotpAuthFilter totpAuthFilter;
   private final TokenAuthProvider tokenAuthProvider;
 
-  public SecurityConfig(final TokenAuthFilter tokenAuthFilter, final TotpAuthFilter totpAuthFilter,
-      final TokenAuthProvider tokenAuthProvider) {
-    this.tokenAuthFilter = tokenAuthFilter;
-    this.totpAuthFilter = totpAuthFilter;
+  public SecurityConfig(final TokenAuthProvider tokenAuthProvider) {
     this.tokenAuthProvider = tokenAuthProvider;
   }
 
@@ -45,8 +40,9 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-        .addFilterBefore(tokenAuthFilter, BearerTokenAuthenticationFilter.class)
-        .addFilterAfter(totpAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(new TokenAuthFilter(new ObjectMapper()),
+            BearerTokenAuthenticationFilter.class)
+        .addFilterAfter(new TotpAuthFilter(), BearerTokenAuthenticationFilter.class)
         .authenticationProvider(tokenAuthProvider)
 //        .exceptionHandling(Customizer.withDefaults())
 //        .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")

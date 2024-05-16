@@ -32,13 +32,13 @@ public class User implements UserDetails {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID userId;
 
-  @Column(nullable = false, length = 64)
+  @Column(nullable = false)
   private String firstName;
-  @Column(nullable = false, length = 64)
+  @Column(nullable = false)
   private String lastName;
   @Column(unique = true, nullable = false)
   private String email;
-  @Column(unique = true, nullable = false, length = 64)
+  @Column(unique = true, nullable = false)
   private String username;
   @Transient
   @Column(nullable = false)

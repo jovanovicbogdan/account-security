@@ -1,14 +1,13 @@
 package dev.bogdanjovanovic.jwtsecurity.auth;
 
-import dev.bogdanjovanovic.jwtsecurity.user.AuthUser;
-import dev.bogdanjovanovic.jwtsecurity.user.User;
-import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.exception.ConflictException;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
+import dev.bogdanjovanovic.jwtsecurity.user.User;
+import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,16 +57,19 @@ public class AuthService {
   public AuthUser authenticate(final LoginRequest request) {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
-    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-        request.username(), request.password()
-    ));
-    revokeAllUserTokens(user);
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            request.username(), request.password()
+        ));
+    if (user.requiresMfa()) {
+      // issue pre-auth token and return requiredMfa and the list of two-factor auths available
+    }
     final String refreshToken = tokenService.generateJwtToken(user, TokenType.REFRESH);
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     saveUserToken(user, refreshToken);
     return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-        user.getUsername(), user.getRole(), authToken, refreshToken
+        user.getUsername(), user.getRole(), user.requiresMfa(), authToken, refreshToken
     );
   }
 
@@ -86,7 +88,7 @@ public class AuthService {
     final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
     return new AuthUser(
         user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-        user.getUsername(), user.getRole(), authToken, null
+        user.getUsername(), user.getRole(), user.requiresMfa(), authToken, null
     );
   }
 

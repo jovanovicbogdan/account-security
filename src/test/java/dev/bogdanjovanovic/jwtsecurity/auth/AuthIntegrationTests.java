@@ -6,7 +6,6 @@ import dev.bogdanjovanovic.jwtsecurity.AbstractTestcontainers;
 import dev.bogdanjovanovic.jwtsecurity.demo.DemoController.DemoResponse;
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenProperties;
-import dev.bogdanjovanovic.jwtsecurity.user.AuthUserResponse;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Objects;
@@ -71,7 +70,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthResponse>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),
@@ -83,7 +82,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     assertThat(loginResponse.getBody().getData()).isNotNull();
     assertThat(loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE)).isNotNull();
 
-    final AuthUserResponse authResponse = loginResponse.getBody().getData();
+    final AuthResponse authResponse = loginResponse.getBody().getData();
     assertThat(authResponse).isNotNull();
     assertThat(authResponse.username()).isEqualTo(username);
     assertThat(authResponse.email()).isEqualTo(email);
@@ -142,7 +141,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthResponse>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),
@@ -208,7 +207,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthResponse>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),
@@ -223,7 +222,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final Cookie refreshTokenCookie = parseRefreshTokenCookie(loginResponse);
 
-    final AuthUserResponse authResponse = loginResponse.getBody().getData();
+    final AuthResponse authResponse = loginResponse.getBody().getData();
     assertThat(authResponse).isNotNull();
     assertThat(authResponse.username()).isEqualTo(username);
     assertThat(authResponse.email()).isEqualTo(email);
@@ -239,7 +238,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
     );
     assertThat(logoutResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> refreshTokenResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthResponse>> refreshTokenResponse = restTemplate.exchange(
         "/api/v1/auth/refresh",
         HttpMethod.POST,
         new HttpEntity<>(headers),
@@ -273,7 +272,7 @@ public class AuthIntegrationTests extends AbstractTestcontainers {
 
     final LoginRequest loginRequest = new LoginRequest(username, password);
 
-    final ResponseEntity<ApiResponseWrapper<AuthUserResponse>> loginResponse = restTemplate.exchange(
+    final ResponseEntity<ApiResponseWrapper<AuthResponse>> loginResponse = restTemplate.exchange(
         "/api/v1/auth/login",
         HttpMethod.POST,
         new HttpEntity<>(loginRequest),

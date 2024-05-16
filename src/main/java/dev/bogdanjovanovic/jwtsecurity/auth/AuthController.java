@@ -5,8 +5,6 @@ import dev.bogdanjovanovic.jwtsecurity.exception.BadRequestException;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
-import dev.bogdanjovanovic.jwtsecurity.user.AuthUser;
-import dev.bogdanjovanovic.jwtsecurity.user.AuthUserResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,7 +50,7 @@ public class AuthController {
   }
 
   @PostMapping("login")
-  public ApiResponseWrapper<AuthUserResponse> login(
+  public ApiResponseWrapper<AuthResponse> login(
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
     log.info("Received login request for user: {}", request.username());
     final AuthUser authUser = authService.authenticate(request);
@@ -64,13 +62,14 @@ public class AuthController {
 //    cookie.setSecure(true);
     response.addCookie(cookie);
     return new ApiResponseWrapper<>(
-        new AuthUserResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
-            authUser.email(), authUser.username(), authUser.role(), authUser.authToken())
+        new AuthResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
+            authUser.email(), authUser.username(), authUser.role(), authUser.requiresMfa(),
+            authUser.authToken())
     );
   }
 
   @PostMapping("refresh")
-  public ApiResponseWrapper<AuthUserResponse> refreshToken(final HttpServletRequest request) {
+  public ApiResponseWrapper<AuthResponse> refreshToken(final HttpServletRequest request) {
     if (request.getCookies() == null || request.getCookies().length == 0) {
       throw new UnauthorizedException("Authentication failed");
     }
@@ -80,8 +79,9 @@ public class AuthController {
         .orElseThrow(() -> new UnauthorizedException("no cookie"));
     final AuthUser authUser = authService.refreshAuthToken(refreshTokenCookie.getValue());
     return new ApiResponseWrapper<>(
-        new AuthUserResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
-            authUser.email(), authUser.username(), authUser.role(), authUser.authToken())
+        new AuthResponse(authUser.userId(), authUser.firstName(), authUser.lastName(),
+            authUser.email(), authUser.username(), authUser.role(), authUser.requiresMfa(),
+            authUser.authToken())
     );
   }
 

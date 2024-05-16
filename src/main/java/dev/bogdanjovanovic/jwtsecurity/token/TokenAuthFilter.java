@@ -13,10 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 public class TokenAuthFilter extends OncePerRequestFilter {
 
   private static final Logger log = LoggerFactory.getLogger(TokenAuthFilter.class);
