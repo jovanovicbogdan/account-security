@@ -49,7 +49,7 @@ public class TokenAuthProvider implements AuthenticationProvider {
     final boolean isTokenValid = tokenService.isTokenValid(jwt.getTokenValue(), subjectClaim,
         TokenType.AUTH, user.getRole());
     if (!isTokenValid) {
-      throw new UnauthorizedException("Authentication failed. Invalid token.");
+      throw new UnauthorizedException("Authentication failed");
     }
     final AbstractAuthenticationToken token = jwtAuthenticationConverter.convert(jwt);
     if (token.getDetails() == null) {
