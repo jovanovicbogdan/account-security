@@ -53,7 +53,7 @@ public class OtpAuthFilter extends OncePerRequestFilter {
       }
       filterChain.doFilter(request, response);
     } else {
-      log.warn("Authentication is null in OTP filter.");
+      log.info("Authentication is null in OTP filter.");
     }
     filterChain.doFilter(request, response);
   }

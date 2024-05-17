@@ -1,11 +1,10 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.bogdanjovanovic.jwtsecurity.mfa.otp.OtpAuthFilter;
-import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthFilter;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,11 +24,13 @@ public class SecurityConfig {
   };
   private final TokenAuthProvider tokenAuthProvider;
   private final OtpAuthFilter otpAuthFilter;
+  private final AuthenticationManager authenticationManager;
 
   public SecurityConfig(final TokenAuthProvider tokenAuthProvider,
-      final OtpAuthFilter otpAuthFilter) {
+      final OtpAuthFilter otpAuthFilter, final AuthenticationManager authenticationManager) {
     this.tokenAuthProvider = tokenAuthProvider;
     this.otpAuthFilter = otpAuthFilter;
+    this.authenticationManager = authenticationManager;
   }
 
   @Bean
@@ -43,7 +44,7 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-        .addFilterBefore(new TokenAuthFilter(), BearerTokenAuthenticationFilter.class)
+        .addFilter(new BearerTokenAuthenticationFilter(authenticationManager))
         .addFilterAfter(otpAuthFilter, BearerTokenAuthenticationFilter.class)
         .authenticationProvider(tokenAuthProvider)
 //        .exceptionHandling(Customizer.withDefaults())
