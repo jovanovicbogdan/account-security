@@ -26,7 +26,7 @@ public class MfaController {
   private final static Logger log = LoggerFactory.getLogger(MfaController.class);
 
   @GetMapping
-  public String getSharedSecret() throws QrGenerationException {
+  public String getSharedSecretQr() throws QrGenerationException {
     final SecretGenerator secretGenerator = new DefaultSecretGenerator();
     final String secret = secretGenerator.generate();
     final QrData data = new QrData.Builder()
