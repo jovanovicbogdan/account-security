@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
 
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

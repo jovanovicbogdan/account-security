@@ -1,7 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.config;
 
-import dev.bogdanjovanovic.jwtsecurity.mfa.otp.OtpAuthFilter;
-import dev.bogdanjovanovic.jwtsecurity.token.TokenAuthProvider;
+import dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp.OtpAuthFilter;
+import dev.bogdanjovanovic.jwtsecurity.auth.AuthTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,13 +22,13 @@ public class SecurityConfig {
   private static final String[] WHITE_LIST_URL = {
       "/api/v1/auth/**"
   };
-  private final TokenAuthProvider tokenAuthProvider;
+  private final AuthTokenProvider authTokenProvider;
   private final OtpAuthFilter otpAuthFilter;
   private final AuthenticationManager authenticationManager;
 
-  public SecurityConfig(final TokenAuthProvider tokenAuthProvider,
+  public SecurityConfig(final AuthTokenProvider authTokenProvider,
       final OtpAuthFilter otpAuthFilter, final AuthenticationManager authenticationManager) {
-    this.tokenAuthProvider = tokenAuthProvider;
+    this.authTokenProvider = authTokenProvider;
     this.otpAuthFilter = otpAuthFilter;
     this.authenticationManager = authenticationManager;
   }
@@ -46,7 +46,7 @@ public class SecurityConfig {
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
         .addFilter(new BearerTokenAuthenticationFilter(authenticationManager))
         .addFilterAfter(otpAuthFilter, BearerTokenAuthenticationFilter.class)
-        .authenticationProvider(tokenAuthProvider)
+        .authenticationProvider(authTokenProvider)
 //        .exceptionHandling(Customizer.withDefaults())
 //        .logout((logout) -> logout.logoutUrl("/api/v1/auth/logout")
 //            .addLogoutHandler(logoutHandler)

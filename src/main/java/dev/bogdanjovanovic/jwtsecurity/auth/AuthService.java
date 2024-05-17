@@ -5,7 +5,7 @@ import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenRepository;
-import dev.bogdanjovanovic.jwtsecurity.token.TokenService;
+import dev.bogdanjovanovic.jwtsecurity.token.TokenUtils;
 import dev.bogdanjovanovic.jwtsecurity.user.User;
 import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
 import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
@@ -20,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
-  private final TokenService tokenService;
+  private final TokenUtils tokenUtils;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final TokenRepository tokenRepository;
   private final AuthenticationManager authenticationManager;
 
-  public AuthService(final TokenService tokenService, final UserRepository userRepository,
+  public AuthService(final TokenUtils tokenUtils, final UserRepository userRepository,
       final PasswordEncoder passwordEncoder, final TokenRepository tokenRepository,
       final AuthenticationManager authenticationManager) {
-    this.tokenService = tokenService;
+    this.tokenUtils = tokenUtils;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.tokenRepository = tokenRepository;
@@ -62,12 +62,12 @@ public class AuthService {
             request.username(), request.password()
         ));
     if (user.requiresMfa()) {
-      final String preAuthToken = tokenService.generateJwtToken(user, TokenType.PRE_AUTH);
+      final String preAuthToken = tokenUtils.generateJwtToken(user, TokenType.PRE_AUTH);
       return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), preAuthToken,
           null);
     }
-    final String refreshToken = tokenService.generateJwtToken(user, TokenType.REFRESH);
-    final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
+    final String refreshToken = tokenUtils.generateJwtToken(user, TokenType.REFRESH);
+    final String authToken = tokenUtils.generateJwtToken(user, TokenType.AUTH);
     saveUserToken(user, refreshToken);
     return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken,
         refreshToken);
@@ -78,14 +78,14 @@ public class AuthService {
     final Token token = tokenRepository.findByToken(refreshToken)
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final User user = token.getUser();
-    final boolean isTokenValid = tokenService.isTokenValid(token.getToken(), user.getUsername(),
+    final boolean isTokenValid = tokenUtils.isTokenValid(token.getToken(), user.getUsername(),
         TokenType.REFRESH, user.getRole());
     if (token.isRevoked() || !isTokenValid) {
       throw new UnauthorizedException("Authentication failed");
     }
     userRepository.findByUsername(user.getUsername())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
-    final String authToken = tokenService.generateJwtToken(user, TokenType.AUTH);
+    final String authToken = tokenUtils.generateJwtToken(user, TokenType.AUTH);
     return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken, null);
   }
 

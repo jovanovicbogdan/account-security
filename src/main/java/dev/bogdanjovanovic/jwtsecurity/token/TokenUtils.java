@@ -1,8 +1,8 @@
 package dev.bogdanjovanovic.jwtsecurity.token;
 
+import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.user.User;
 import dev.bogdanjovanovic.jwtsecurity.user.User.Role;
-import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
@@ -12,16 +12,16 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class TokenService {
+@Component
+public class TokenUtils {
 
   private final JwtEncoder jwtEncoder;
   private final JwtDecoder jwtDecoder;
   private final TokenProperties tokenProperties;
 
-  public TokenService(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
+  public TokenUtils(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
       final TokenProperties tokenProperties) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;

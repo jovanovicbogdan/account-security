@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.user;
 
-import dev.bogdanjovanovic.jwtsecurity.mfa.otp.OtpDevice;
+import dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp.OtpDevice;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

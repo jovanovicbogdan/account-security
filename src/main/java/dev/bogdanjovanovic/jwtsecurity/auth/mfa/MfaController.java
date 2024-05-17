@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.mfa;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa;
 
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 

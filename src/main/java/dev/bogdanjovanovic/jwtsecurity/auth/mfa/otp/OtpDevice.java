@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
 
 import dev.bogdanjovanovic.jwtsecurity.user.User;
 import jakarta.persistence.Column;

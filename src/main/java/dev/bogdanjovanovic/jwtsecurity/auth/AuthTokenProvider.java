@@ -1,5 +1,6 @@
-package dev.bogdanjovanovic.jwtsecurity.token;
+package dev.bogdanjovanovic.jwtsecurity.auth;
 
+import dev.bogdanjovanovic.jwtsecurity.token.TokenUtils;
 import dev.bogdanjovanovic.jwtsecurity.user.User;
 import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
@@ -20,21 +21,21 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 
 @Component
-public class TokenAuthProvider implements AuthenticationProvider {
+public class AuthTokenProvider implements AuthenticationProvider {
 
-  private final Logger log = LoggerFactory.getLogger(TokenAuthProvider.class);
+  private final Logger log = LoggerFactory.getLogger(AuthTokenProvider.class);
 
   private final JwtDecoder jwtDecoder;
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
-  private final TokenService tokenService;
+  private final TokenUtils tokenUtils;
   private final UserRepository userRepository;
 
-  public TokenAuthProvider(final JwtDecoder jwtDecoder,
+  public AuthTokenProvider(final JwtDecoder jwtDecoder,
       final JwtAuthenticationConverter jwtAuthenticationConverter,
-      final TokenService tokenService, final UserRepository userRepository) {
+      final TokenUtils tokenUtils, final UserRepository userRepository) {
     this.jwtDecoder = jwtDecoder;
     this.jwtAuthenticationConverter = jwtAuthenticationConverter;
-    this.tokenService = tokenService;
+    this.tokenUtils = tokenUtils;
     this.userRepository = userRepository;
   }
 
@@ -46,7 +47,7 @@ public class TokenAuthProvider implements AuthenticationProvider {
     final String subjectClaim = jwt.getSubject();
     final User user = userRepository.findByUsername(subjectClaim)
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
-    final boolean isTokenValid = tokenService.isTokenValid(jwt.getTokenValue(), subjectClaim,
+    final boolean isTokenValid = tokenUtils.isTokenValid(jwt.getTokenValue(), subjectClaim,
         TokenType.AUTH, user.getRole());
     if (!isTokenValid) {
       throw new UnauthorizedException("Authentication failed");

@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
 
 import org.springframework.stereotype.Service;
 
