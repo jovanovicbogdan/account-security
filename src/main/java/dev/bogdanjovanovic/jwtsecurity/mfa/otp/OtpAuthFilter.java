@@ -34,6 +34,10 @@ public class OtpAuthFilter extends OncePerRequestFilter {
       @NonNull final HttpServletResponse response,
       @NonNull final FilterChain filterChain) throws ServletException, IOException {
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!request.getRequestURI().contains("mfa")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
     if (authentication != null) {
       if (authentication.isAuthenticated()) {
         final JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
