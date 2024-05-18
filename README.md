@@ -2,7 +2,25 @@
 
 - Spring Boot Security project
 
-## Generate Keypair
+## Summary
+
+**MFA Setup**:
+
+- User is logged in with username and password.
+- User scans a QR code with Google Authenticator to set up MFA.
+- User verifies the setup by providing a TOTP, which the server validates.
+
+1. **Initial Authentication**:
+   - User logs in with username and password.
+   - If MFA is required, a pre-auth token is issued.
+
+2. **MFA Verification**:
+   - User provides the pre-auth token and TOTP.
+   - Server verifies both the pre-auth token and TOTP.
+   - Upon successful verification, the server issues a regular JWT for accessing protected
+     resources.
+
+### Generate Keypair
 
 ```bash
 # create rsa key pair
@@ -21,24 +39,6 @@ openssl rsa -in keypair.pem -pubout -out public.pem
 
 openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out private.pem
 ```
-
-### Summary
-
-**MFA Setup**:
-
-- User is logged in with username and password.
-- User scans a QR code with Google Authenticator to set up MFA.
-- User verifies the setup by providing a TOTP, which the server validates.
-
-1. **Initial Authentication**:
-    - User logs in with username and password.
-    - If MFA is required, a pre-auth token is issued.
-
-2. **MFA Verification**:
-    - User provides the pre-auth token and TOTP.
-    - Server verifies both the pre-auth token and TOTP.
-    - Upon successful verification, the server issues a regular JWT for accessing protected
-      resources.
 
 #### TODO
 
