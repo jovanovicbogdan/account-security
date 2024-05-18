@@ -18,7 +18,7 @@
    - User provides the pre-auth token and TOTP.
    - Server verifies both the pre-auth token and TOTP.
    - Upon successful verification, the server issues a regular JWT for accessing protected
-     resources.
+     resources and refresh token in a form of a cookie.
 
 ### Generate Keypair
 
