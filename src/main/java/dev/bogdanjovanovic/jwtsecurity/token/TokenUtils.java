@@ -28,7 +28,7 @@ public class TokenUtils {
     this.tokenProperties = tokenProperties;
   }
 
-  public String generateJwtToken(final User user, final TokenType tokenType) {
+  public String generateJwt(final User user, final TokenType tokenType) {
     final Instant now = Instant.now();
     final Instant expiresAt = getExpirationByTokenType(tokenType);
     final String scope = user.getAuthorities().stream()

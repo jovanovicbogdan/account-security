@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.totp;
 
 import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
 import dev.bogdanjovanovic.jwtsecurity.user.User;
@@ -8,28 +8,28 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 //@Component
-public class OtpAuthProvider implements AuthenticationProvider {
+public class TotpAuthProvider implements AuthenticationProvider {
 
   private final UserDetailsService userDetailsService;
 
-  public OtpAuthProvider(final UserDetailsService userDetailsService) {
+  public TotpAuthProvider(final UserDetailsService userDetailsService) {
     this.userDetailsService = userDetailsService;
   }
 
   @Override
   public Authentication authenticate(final Authentication authentication)
       throws AuthenticationException {
-    final Otp otp = (Otp) authentication;
-    final String username = otp.getName();
+    final Totp totp = (Totp) authentication;
+    final String username = totp.getName();
     final User user = (User) userDetailsService.loadUserByUsername(username);
     if (user.otpDevice() == null) {
       throw new UnauthorizedException("No device attached");
     }
-    return otp.getAuthentication();
+    return totp.getAuthentication();
   }
 
   @Override
   public boolean supports(final Class<?> authentication) {
-    return authentication == Otp.class;
+    return authentication == Totp.class;
   }
 }

@@ -61,13 +61,13 @@ public class AuthService {
         new UsernamePasswordAuthenticationToken(
             request.username(), request.password()
         ));
-    if (user.requiresMfa()) {
-      final String preAuthToken = tokenUtils.generateJwtToken(user, TokenType.PRE_AUTH);
-      return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), preAuthToken,
-          null);
-    }
-    final String refreshToken = tokenUtils.generateJwtToken(user, TokenType.REFRESH);
-    final String authToken = tokenUtils.generateJwtToken(user, TokenType.AUTH);
+//    if (user.requiresMfa()) {
+//      final String preAuthToken = tokenUtils.generateJwt(user, TokenType.PRE_AUTH);
+//      return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), preAuthToken,
+//          null);
+//    }
+    final String refreshToken = tokenUtils.generateJwt(user, TokenType.REFRESH);
+    final String authToken = tokenUtils.generateJwt(user, TokenType.AUTH);
     saveUserToken(user, refreshToken);
     return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken,
         refreshToken);
@@ -85,7 +85,7 @@ public class AuthService {
     }
     userRepository.findByUsername(user.getUsername())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
-    final String authToken = tokenUtils.generateJwtToken(user, TokenType.AUTH);
+    final String authToken = tokenUtils.generateJwt(user, TokenType.AUTH);
     return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken, null);
   }
 

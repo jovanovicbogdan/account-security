@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.totp;
 
 import dev.bogdanjovanovic.jwtsecurity.user.User;
 import jakarta.persistence.Column;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "otp_device")
-public class OtpDevice {
+public class TotpDevice {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,14 +23,14 @@ public class OtpDevice {
   @Column(nullable = false)
   private String secret;
   @Column(nullable = false)
-  private boolean confirmed;
+  private boolean confirmed = false;
   @Column(nullable = false)
   private boolean enabled;
   @OneToOne
   @JoinColumn(name = "user_id", referencedColumnName = "userId")
   private User user;
 
-  public OtpDevice() {}
+  public TotpDevice() {}
 
   public UUID getOtpDeviceId() {
     return otpDeviceId;

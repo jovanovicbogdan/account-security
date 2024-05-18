@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.jwtsecurity.user;
 
-import dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp.OtpDevice;
+import dev.bogdanjovanovic.jwtsecurity.auth.mfa.totp.TotpDevice;
 import dev.bogdanjovanovic.jwtsecurity.token.Token;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,7 +55,7 @@ public class User implements UserDetails {
   @OneToMany(mappedBy = "user")
   private List<Token> tokens = new ArrayList<>();
   @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-  private OtpDevice otpDevice = new OtpDevice();
+  private TotpDevice totpDevice = new TotpDevice();
   @CreatedDate
   private Instant createdAt;
   @LastModifiedDate
@@ -65,7 +65,7 @@ public class User implements UserDetails {
   }
 
   public User(UUID userId, String firstName, String lastName, String email, String username,
-      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens, OtpDevice otpDevice) {
+      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens, TotpDevice totpDevice) {
     this.userId = userId;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -75,11 +75,11 @@ public class User implements UserDetails {
     this.role = role;
     this.requiresMfa = requiresMfa;
     this.tokens = tokens;
-    this.otpDevice = otpDevice;
+    this.totpDevice = totpDevice;
   }
 
   public User(String firstName, String lastName, String email, String username, String passwordHash,
-      Role role, boolean requiresMfa, List<Token> tokens, OtpDevice otpDevice) {
+      Role role, boolean requiresMfa, List<Token> tokens, TotpDevice totpDevice) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
@@ -88,7 +88,7 @@ public class User implements UserDetails {
     this.role = role;
     this.requiresMfa = requiresMfa;
     this.tokens = tokens;
-    this.otpDevice = otpDevice;
+    this.totpDevice = totpDevice;
   }
 
   @Override
@@ -158,8 +158,8 @@ public class User implements UserDetails {
     return requiresMfa;
   }
 
-  public OtpDevice otpDevice() {
-    return otpDevice;
+  public TotpDevice otpDevice() {
+    return totpDevice;
   }
 
   public enum Role {
@@ -189,7 +189,7 @@ public class User implements UserDetails {
         ", role=" + role +
         ", requiresMfa=" + requiresMfa +
         ", tokens=" + tokens +
-        ", otpDevice=" + otpDevice +
+        ", otpDevice=" + totpDevice +
         ", createdAt=" + createdAt +
         ", updatedAt=" + updatedAt +
         '}';

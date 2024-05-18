@@ -1,15 +1,15 @@
-package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.totp;
 
 import java.util.Collection;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-public class Otp implements Authentication {
+public class Totp implements Authentication {
 
   private final Authentication authentication;
   private final String code;
 
-  public Otp(final Authentication authentication, final String code) {
+  public Totp(final Authentication authentication, final String code) {
     this.authentication = authentication;
     this.code = code;
   }

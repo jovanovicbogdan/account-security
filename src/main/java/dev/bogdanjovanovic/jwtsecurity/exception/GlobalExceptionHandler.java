@@ -1,6 +1,7 @@
 package dev.bogdanjovanovic.jwtsecurity.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -79,36 +80,30 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(UnauthorizedException.class)
-  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+  public void handleException(
       final UnauthorizedException ex,
-      final HttpServletRequest request) {
+      final HttpServletRequest request,
+    final HttpServletResponse response) {
     log.info("Unauthorized access attempted: {}", ex.getMessage());
-    final ApiResponse response = new ApiResponse(request.getRequestURI(),
-        ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
-        LocalDateTime.now());
-    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @ExceptionHandler(JwtValidationException.class)
-  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+  public void handleException(
       final JwtValidationException ex,
-      final HttpServletRequest request) {
+      final HttpServletRequest request,
+      final HttpServletResponse response) {
     log.info(ex.getMessage());
-    final ApiResponse response = new ApiResponse(request.getRequestURI(),
-        ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
-        LocalDateTime.now());
-    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @ExceptionHandler(BadCredentialsException.class)
-  public ResponseEntity<ApiResponseWrapper<ApiResponse>> handleException(
+  public void handleException(
       final BadCredentialsException ex,
-      final HttpServletRequest request) {
-    log.info("Bad credentials: {}", ex.getMessage());
-    final ApiResponse response = new ApiResponse(request.getRequestURI(),
-        "Authentication failed", HttpStatus.UNAUTHORIZED.value(),
-        LocalDateTime.now());
-    return new ResponseEntity<>(new ApiResponseWrapper<>(response), HttpStatus.UNAUTHORIZED);
+      final HttpServletRequest request,
+      final HttpServletResponse response) {
+    log.info(ex.getMessage());
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @ExceptionHandler(Exception.class)

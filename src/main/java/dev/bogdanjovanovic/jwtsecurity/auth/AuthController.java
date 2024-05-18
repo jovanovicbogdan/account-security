@@ -54,14 +54,14 @@ public class AuthController {
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
     log.info("Received login request for user: {}", request.username());
     final AuthUser authUser = authService.authenticate(request);
-    if (authUser.requiresMfa()) {
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.setHeader("WWW-Authenticate", "OTP");
-      return new ApiResponseWrapper<>(
-          new AuthResponse(null, null, true,
-              authUser.authToken())
-      );
-    }
+//    if (authUser.requiresMfa()) {
+//      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//      response.setHeader("WWW-Authenticate", "OTP");
+//      return new ApiResponseWrapper<>(
+//          new AuthResponse(null, null, true,
+//              authUser.authToken())
+//      );
+//    }
     final Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, authUser.refreshToken());
     cookie.setHttpOnly(true);
     cookie.setPath("/");

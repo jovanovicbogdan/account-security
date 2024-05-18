@@ -1,9 +1,9 @@
-package dev.bogdanjovanovic.jwtsecurity.auth.mfa.otp;
+package dev.bogdanjovanovic.jwtsecurity.auth.mfa.totp;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class OtpService {
+public class TotpService {
 
   public void confirm() {
 

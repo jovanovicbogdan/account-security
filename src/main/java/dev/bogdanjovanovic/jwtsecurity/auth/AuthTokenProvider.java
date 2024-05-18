@@ -1,16 +1,18 @@
 package dev.bogdanjovanovic.jwtsecurity.auth;
 
+import dev.bogdanjovanovic.jwtsecurity.exception.AuthException;
+import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
+import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.jwtsecurity.token.TokenUtils;
 import dev.bogdanjovanovic.jwtsecurity.user.User;
 import dev.bogdanjovanovic.jwtsecurity.user.UserRepository;
-import dev.bogdanjovanovic.jwtsecurity.exception.UnauthorizedException;
-import dev.bogdanjovanovic.jwtsecurity.token.Token.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -41,7 +43,7 @@ public class AuthTokenProvider implements AuthenticationProvider {
 
   @Override
   public Authentication authenticate(final Authentication authentication)
-      throws UnauthorizedException {
+      throws AuthenticationException {
     final BearerTokenAuthenticationToken bearer = (BearerTokenAuthenticationToken) authentication;
     final Jwt jwt = getJwt(bearer);
     final String subjectClaim = jwt.getSubject();
@@ -50,7 +52,7 @@ public class AuthTokenProvider implements AuthenticationProvider {
     final boolean isTokenValid = tokenUtils.isTokenValid(jwt.getTokenValue(), subjectClaim,
         TokenType.AUTH, user.getRole());
     if (!isTokenValid) {
-      throw new UnauthorizedException("Authentication failed");
+      throw new AuthException("Authentication failed");
     }
     final AbstractAuthenticationToken token = jwtAuthenticationConverter.convert(jwt);
     if (token.getDetails() == null) {
