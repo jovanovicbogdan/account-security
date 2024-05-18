@@ -158,7 +158,7 @@ public class User implements UserDetails {
     return requiresMfa;
   }
 
-  public TotpDevice otpDevice() {
+  public TotpDevice totpDevice() {
     return totpDevice;
   }
 

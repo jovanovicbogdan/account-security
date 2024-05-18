@@ -19,7 +19,7 @@ public class TotpDevice {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID otpDeviceId;
   @Column(unique = true, nullable = false)
-  private String name;
+  private String deviceName;
   @Column(nullable = false)
   private String secret;
   @Column(nullable = false)
@@ -32,12 +32,20 @@ public class TotpDevice {
 
   public TotpDevice() {}
 
+  public TotpDevice(String deviceName, String secret, boolean confirmed, boolean enabled, User user) {
+    this.deviceName = deviceName;
+    this.secret = secret;
+    this.confirmed = confirmed;
+    this.enabled = enabled;
+    this.user = user;
+  }
+
   public UUID getOtpDeviceId() {
     return otpDeviceId;
   }
 
-  public String getName() {
-    return name;
+  public String getDeviceName() {
+    return deviceName;
   }
 
   public String getSecret() {

@@ -53,7 +53,7 @@ public class AuthService {
     userRepository.save(user);
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.READ_COMMITTED)
   public AuthUser authenticate(final LoginRequest request) {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
@@ -69,11 +69,10 @@ public class AuthService {
     final String refreshToken = tokenUtils.generateJwt(user, TokenType.REFRESH);
     final String authToken = tokenUtils.generateJwt(user, TokenType.AUTH);
     saveUserToken(user, refreshToken);
-    return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken,
-        refreshToken);
+    return new AuthUser(user.requiresMfa(), authToken, refreshToken);
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.READ_COMMITTED)
   public AuthUser refreshAuthToken(final String refreshToken) {
     final Token token = tokenRepository.findByToken(refreshToken)
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
@@ -86,7 +85,7 @@ public class AuthService {
     userRepository.findByUsername(user.getUsername())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final String authToken = tokenUtils.generateJwt(user, TokenType.AUTH);
-    return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), authToken, null);
+    return new AuthUser(user.requiresMfa(), authToken, null);
   }
 
   private void revokeAllUserTokens(final User user) {

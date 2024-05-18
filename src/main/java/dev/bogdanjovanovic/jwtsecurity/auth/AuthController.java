@@ -69,10 +69,7 @@ public class AuthController {
     cookie.setAttribute("SameSite", "Strict");
 //    cookie.setSecure(true);
     response.addCookie(cookie);
-    return new ApiResponseWrapper<>(
-        new AuthResponse(authUser.userId(), authUser.username(), false,
-            authUser.authToken())
-    );
+    return new ApiResponseWrapper<>(new AuthResponse(false, authUser.authToken()));
   }
 
   @PostMapping("refresh")
@@ -85,10 +82,7 @@ public class AuthController {
         .findFirst()
         .orElseThrow(() -> new UnauthorizedException("no cookie"));
     final AuthUser authUser = authService.refreshAuthToken(refreshTokenCookie.getValue());
-    return new ApiResponseWrapper<>(
-        new AuthResponse(authUser.userId(), authUser.username(), authUser.requiresMfa(),
-            authUser.authToken())
-    );
+    return new ApiResponseWrapper<>(new AuthResponse(authUser.requiresMfa(), authUser.authToken()));
   }
 
   @Transactional

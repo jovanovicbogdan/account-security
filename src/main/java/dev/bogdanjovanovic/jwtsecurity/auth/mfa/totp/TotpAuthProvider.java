@@ -22,7 +22,7 @@ public class TotpAuthProvider implements AuthenticationProvider {
     final Totp totp = (Totp) authentication;
     final String username = totp.getName();
     final User user = (User) userDetailsService.loadUserByUsername(username);
-    if (user.otpDevice() == null) {
+    if (user.totpDevice() == null) {
       throw new UnauthorizedException("No device attached");
     }
     return totp.getAuthentication();

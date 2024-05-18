@@ -1,14 +1,14 @@
 package dev.bogdanjovanovic.jwtsecurity.auth.mfa;
 
 import dev.bogdanjovanovic.jwtsecurity.exception.ApiResponseWrapper;
-import dev.bogdanjovanovic.jwtsecurity.user.User;
 import dev.samstevens.totp.exceptions.QrGenerationException;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,11 +26,19 @@ public class MfaController {
   }
 
   @PostMapping("setup")
-  public ApiResponseWrapper<MfaSetupResponse> setupMfa(final Principal user)
+  public ApiResponseWrapper<MfaSetupResponse> setupMfa(
+      @RequestBody @Valid final MfaSetupRequest request, final Principal user)
       throws QrGenerationException {
     final String username = user.getName();
-    log.info(String.format("Received a request to setup MFA for user %s", username));
-    return new ApiResponseWrapper<>(mfaService.setupMfa(username));
+    log.info("Received a request to setup MFA for user {}", username);
+    return new ApiResponseWrapper<>(mfaService.setupMfa(request, username));
+  }
+
+  @PostMapping("setup/confirm")
+  public void confirmMfa(@RequestBody @Valid final MfaSetupConfirmRequest request,
+      final Principal user) {
+    final String username = user.getName();
+    log.info("Received a request to confirm MFA for user {}", username);
   }
 
 //  @GetMapping
@@ -51,9 +59,10 @@ public class MfaController {
 //    return getDataUriForImage(imageData, mimeType);
 //  }
 
-  @PostMapping
-  public void verifyOtpCode() {
-    log.info("Verifying OTP code...");
+  @PostMapping("verify")
+  public void verifyTotpCode(final Principal user) {
+    final String username = user.getName();
+    log.info("Received a request to verify TOTP code for user {}", username);
   }
 
 }
