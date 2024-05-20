@@ -1,6 +1,6 @@
-# Authentication Web Server
+# Account Security
 
-- Spring Boot Security project
+- Spring Security with OAuth2 Resource Server
 
 ## Summary
 
