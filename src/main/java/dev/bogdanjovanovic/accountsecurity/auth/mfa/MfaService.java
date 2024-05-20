@@ -2,8 +2,8 @@ package dev.bogdanjovanovic.accountsecurity.auth.mfa;
 
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
-import dev.bogdanjovanovic.accountsecurity.auth.mfa.totp.TotpDevice;
-import dev.bogdanjovanovic.accountsecurity.auth.mfa.totp.TotpDeviceRepository;
+import dev.bogdanjovanovic.accountsecurity.totp.TotpDevice;
+import dev.bogdanjovanovic.accountsecurity.totp.TotpDeviceRepository;
 import dev.bogdanjovanovic.accountsecurity.exception.BadRequestException;
 import dev.bogdanjovanovic.accountsecurity.exception.ConflictException;
 import dev.bogdanjovanovic.accountsecurity.user.User;

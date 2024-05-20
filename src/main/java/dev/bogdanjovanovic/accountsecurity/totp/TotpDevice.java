@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.accountsecurity.auth.mfa.totp;
+package dev.bogdanjovanovic.accountsecurity.totp;
 
 import dev.bogdanjovanovic.accountsecurity.user.User;
 import jakarta.persistence.Column;

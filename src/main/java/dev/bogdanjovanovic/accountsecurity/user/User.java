@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.accountsecurity.user;
 
-import dev.bogdanjovanovic.accountsecurity.auth.mfa.totp.TotpDevice;
+import dev.bogdanjovanovic.accountsecurity.totp.TotpDevice;
 import dev.bogdanjovanovic.accountsecurity.token.Token;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -158,7 +158,7 @@ public class User implements UserDetails {
     return requiresMfa;
   }
 
-  public TotpDevice totpDevice() {
+  public TotpDevice getTotpDevice() {
     return totpDevice;
   }
 

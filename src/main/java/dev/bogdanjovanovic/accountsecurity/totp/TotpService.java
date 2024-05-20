@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.accountsecurity.auth.mfa.totp;
+package dev.bogdanjovanovic.accountsecurity.totp;
 
 import org.springframework.stereotype.Service;
 

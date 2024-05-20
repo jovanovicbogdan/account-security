@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.accountsecurity.auth.mfa.totp;
+package dev.bogdanjovanovic.accountsecurity.totp;
 
 import java.util.Collection;
 import org.springframework.security.core.Authentication;
@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 public class Totp implements Authentication {
 
+  public static final String TOTP_HEADER_NAME = "TOTP";
   private final Authentication authentication;
   private final String code;
 

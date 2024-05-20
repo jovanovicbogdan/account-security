@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.accountsecurity.auth.mfa.totp;
+package dev.bogdanjovanovic.accountsecurity.totp;
 
 import dev.bogdanjovanovic.accountsecurity.user.User;
 import dev.bogdanjovanovic.accountsecurity.user.UserRepository;
@@ -10,20 +10,25 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Component
 public class TotpAuthFilter extends OncePerRequestFilter {
 
   private static final Logger log = LoggerFactory.getLogger(TotpAuthFilter.class);
   private final UserRepository userRepository;
+  private final AuthenticationManager authenticationManager;
 
-  public TotpAuthFilter(final UserRepository userRepository) {
+  public TotpAuthFilter(final UserRepository userRepository,
+      final AuthenticationManager authenticationManager) {
     this.userRepository = userRepository;
+    this.authenticationManager = authenticationManager;
   }
 
   @Override
@@ -32,30 +37,36 @@ public class TotpAuthFilter extends OncePerRequestFilter {
       @NonNull final HttpServletResponse response,
       @NonNull final FilterChain filterChain) throws ServletException, IOException {
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (!request.getRequestURI().contains("mfa")) {
+    if (!request.getRequestURI().contains("/auth/mfa/verify")) {
       filterChain.doFilter(request, response);
       return;
     }
     if (authentication != null) {
       if (authentication.isAuthenticated()) {
-        final JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
-        final Jwt jwt = jwtAuthToken.getToken();
-        final User user = userRepository.findByUsername(jwt.getSubject())
+        final User user = userRepository.findByUsername(authentication.getName())
             .orElseThrow(() -> new UsernameNotFoundException("Authentication failed"));
         if (user.requiresMfa()) {
-          final Totp totp = new TotpConverter(authentication).convert(request);
+          final TotpConverter totpConverter = new TotpConverter(authentication);
+          final Totp totp = totpConverter.convert(request);
           if (totp == null || totp.getCredentials().isBlank()) {
-            log.info(String.format("OTP code is missing for user %s", user.getUsername()));
+            log.info("TOTP code is missing for user '{}'", user.getUsername());
+            response.setHeader("WWW-Authenticate", Totp.TOTP_HEADER_NAME);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setHeader("WWW-Authenticate", "OTP");
             return;
           }
-          final String code = totp.getCredentials();
+          try {
+            final Authentication authed = authenticationManager.authenticate(totp);
+            SecurityContextHolder.getContext().setAuthentication(authed);
+          } catch (AuthenticationException e) {
+            response.setHeader("WWW-Authenticate", Totp.TOTP_HEADER_NAME);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+          }
         }
       }
       filterChain.doFilter(request, response);
     } else {
-      log.info("Authentication is null in OTP filter.");
+      log.info("Authentication is null in TOTP filter.");
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
     filterChain.doFilter(request, response);

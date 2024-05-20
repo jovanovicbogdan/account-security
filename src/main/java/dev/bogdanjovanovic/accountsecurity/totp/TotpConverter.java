@@ -1,4 +1,4 @@
-package dev.bogdanjovanovic.accountsecurity.auth.mfa.totp;
+package dev.bogdanjovanovic.accountsecurity.totp;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
@@ -14,12 +14,12 @@ public class TotpConverter implements AuthenticationConverter {
 
   @Override
   public Totp convert(final HttpServletRequest request) {
-    final String otpHeaderValue = request.getHeader("otp");
+    final String totpHeaderValue = request.getHeader(Totp.TOTP_HEADER_NAME);
 
-    if (otpHeaderValue == null || otpHeaderValue.isBlank()) {
+    if (totpHeaderValue == null || totpHeaderValue.isBlank()) {
       return null;
     }
 
-    return new Totp(authentication, otpHeaderValue);
+    return new Totp(authentication, totpHeaderValue);
   }
 }
