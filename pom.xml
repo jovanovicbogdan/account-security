@@ -10,10 +10,10 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>dev.bogdanjovanovic</groupId>
-  <artifactId>jwt-security</artifactId>
+  <artifactId>account-security</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>jwt-security</name>
-  <description>Spring Security JWT with OAuth2 Resource Server</description>
+  <name>account-security</name>
+  <description>Spring Security with OAuth2 Resource Server</description>
   <properties>
     <java.version>17</java.version>
   </properties>
