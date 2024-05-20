@@ -46,13 +46,14 @@ public class AuthController {
   @PostMapping("register")
   @ResponseStatus(HttpStatus.CREATED)
   public void register(@RequestBody @Valid final RegisterRequest request) {
+    log.info("Received register request");
     authService.register(request);
   }
 
   @PostMapping("login")
   public ApiResponseWrapper<AuthResponse> login(
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
-    log.info("Received login request for user: {}", request.username());
+    log.info("Received login request");
     final AuthUser authUser = authService.authenticate(request);
 //    if (authUser.requiresMfa()) {
 //      response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -74,6 +75,7 @@ public class AuthController {
 
   @PostMapping("refresh")
   public ApiResponseWrapper<AuthResponse> refreshToken(final HttpServletRequest request) {
+    log.info("Received a request to refresh token.");
     if (request.getCookies() == null || request.getCookies().length == 0) {
       throw new UnauthorizedException("Authentication failed");
     }
@@ -90,6 +92,7 @@ public class AuthController {
   public void logout(
       final HttpServletRequest request,
       final HttpServletResponse response) {
+    log.info("Received a request to logout the user");
     if (request.getCookies() == null || request.getCookies().length == 0) {
       throw new UnauthorizedException("Logout failed");
     }

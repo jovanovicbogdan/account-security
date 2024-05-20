@@ -9,6 +9,7 @@
 - User is logged in with username and password.
 - User scans a QR code with Google Authenticator to set up MFA.
 - User verifies the setup by providing a TOTP, which the server validates.
+- Server returns recovery codes that can be used if, for example, user loses his device.
 
 1. **Initial Authentication**:
    - User logs in with username and password.

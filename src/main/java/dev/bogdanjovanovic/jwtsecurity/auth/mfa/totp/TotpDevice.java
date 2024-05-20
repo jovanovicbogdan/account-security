@@ -56,8 +56,16 @@ public class TotpDevice {
     return confirmed;
   }
 
+  public void setConfirmed(final boolean confirmed) {
+    this.confirmed = confirmed;
+  }
+
   public boolean isEnabled() {
     return enabled;
+  }
+
+  public void setEnabled(final boolean enabled) {
+    this.enabled = enabled;
   }
 
 }

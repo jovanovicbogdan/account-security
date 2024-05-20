@@ -30,7 +30,7 @@ public class MfaController {
       @RequestBody @Valid final MfaSetupRequest request, final Principal user)
       throws QrGenerationException {
     final String username = user.getName();
-    log.info("Received a request to setup MFA for user {}", username);
+    log.info("Received a request to setup MFA for user '{}'", username);
     return new ApiResponseWrapper<>(mfaService.setupMfa(request, username));
   }
 
@@ -38,7 +38,8 @@ public class MfaController {
   public void confirmMfa(@RequestBody @Valid final MfaSetupConfirmRequest request,
       final Principal user) {
     final String username = user.getName();
-    log.info("Received a request to confirm MFA for user {}", username);
+    log.info("Received a request to confirm MFA for user '{}'", username);
+    mfaService.confirmSetupMfa(request, username);
   }
 
 //  @GetMapping
