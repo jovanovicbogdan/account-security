@@ -1,11 +1,16 @@
 package dev.bogdanjovanovic.accountsecurity.auth.mfa;
 
+import dev.bogdanjovanovic.accountsecurity.auth.AuthController;
 import dev.bogdanjovanovic.accountsecurity.exception.ApiResponseWrapper;
 import dev.samstevens.totp.exceptions.QrGenerationException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,11 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth/mfa")
-//@CrossOrigin(origins = {"http://localhost:4200"})
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:4200"}, allowCredentials = "true")
 public class MfaController {
 
   private final static Logger log = LoggerFactory.getLogger(MfaController.class);
+
+  @Value("${security.refresh-token-expiration}")
+  private long refreshTokenExpiration;
   private final MfaService mfaService;
 
   public MfaController(final MfaService mfaService) {
@@ -42,28 +49,28 @@ public class MfaController {
     mfaService.confirmSetupMfa(request, username);
   }
 
-//  @GetMapping
-//  public String getSharedSecretQr() throws QrGenerationException {
-//    final SecretGenerator secretGenerator = new DefaultSecretGenerator();
-//    final String secret = secretGenerator.generate();
-//    final QrData data = new QrData.Builder()
-//        .label("johndoe@example.com")
-//        .secret(secret)
-//        .issuer("AccountSecurity")
-//        .algorithm(HashingAlgorithm.SHA1)
-//        .digits(6)
-//        .period(60)
-//        .build();
-//    final QrGenerator generator = new ZxingPngQrGenerator();
-//    final byte[] imageData = generator.generate(data);
-//    final String mimeType = generator.getImageMimeType();
-//    return getDataUriForImage(imageData, mimeType);
-//  }
-
   @PostMapping("verify")
-  public void verifyTotpCode(final Principal user) {
+  public ApiResponseWrapper<MfaVerificationResponse> verifyTotpCode(
+      final HttpServletRequest request, final HttpServletResponse response,
+      final Principal user) {
+    final String code = request.getHeader("totp");
+    if (code == null || code.isBlank()) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.setHeader("WWW-Authenticate", "TOTP");
+      return new ApiResponseWrapper<>(null);
+    }
     final String username = user.getName();
-    log.info("Received a request to verify TOTP code for user {}", username);
+    log.info("Received a request to verify TOTP code for user '{}'", username);
+    final MfaAuthUser mfaAuthUser = mfaService.verifyTotpCode(code, username);
+    final Cookie cookie = new Cookie(AuthController.REFRESH_TOKEN_COOKIE_NAME,
+        mfaAuthUser.refreshToken());
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge((int) (refreshTokenExpiration / 1000));
+    cookie.setAttribute("SameSite", "Strict");
+//    cookie.setSecure(true);
+    response.addCookie(cookie);
+    return new ApiResponseWrapper<>(new MfaVerificationResponse(mfaAuthUser.authToken()));
   }
 
 }

@@ -2,10 +2,16 @@ package dev.bogdanjovanovic.accountsecurity.auth.mfa;
 
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
-import dev.bogdanjovanovic.accountsecurity.totp.TotpDevice;
-import dev.bogdanjovanovic.accountsecurity.totp.TotpDeviceRepository;
+import dev.bogdanjovanovic.accountsecurity.auth.AuthUser;
 import dev.bogdanjovanovic.accountsecurity.exception.BadRequestException;
 import dev.bogdanjovanovic.accountsecurity.exception.ConflictException;
+import dev.bogdanjovanovic.accountsecurity.exception.UnauthorizedException;
+import dev.bogdanjovanovic.accountsecurity.token.Token;
+import dev.bogdanjovanovic.accountsecurity.token.Token.TokenType;
+import dev.bogdanjovanovic.accountsecurity.token.TokenRepository;
+import dev.bogdanjovanovic.accountsecurity.token.TokenUtils;
+import dev.bogdanjovanovic.accountsecurity.totp.TotpDevice;
+import dev.bogdanjovanovic.accountsecurity.totp.TotpDeviceRepository;
 import dev.bogdanjovanovic.accountsecurity.user.User;
 import dev.bogdanjovanovic.accountsecurity.user.UserRepository;
 import dev.samstevens.totp.code.CodeGenerator;
@@ -21,6 +27,7 @@ import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
 import dev.samstevens.totp.time.SystemTimeProvider;
 import dev.samstevens.totp.time.TimeProvider;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +37,16 @@ public class MfaService {
 
   private final UserRepository userRepository;
   private final TotpDeviceRepository totpDeviceRepository;
+  private final TokenRepository tokenRepository;
+  private final TokenUtils tokenUtils;
 
   public MfaService(final UserRepository userRepository,
-      final TotpDeviceRepository totpDeviceRepository) {
+      final TotpDeviceRepository totpDeviceRepository, final TokenRepository tokenRepository,
+      final TokenUtils tokenUtils) {
     this.userRepository = userRepository;
     this.totpDeviceRepository = totpDeviceRepository;
+    this.tokenRepository = tokenRepository;
+    this.tokenUtils = tokenUtils;
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -76,6 +88,27 @@ public class MfaService {
     totpDeviceRepository.save(totpDevice);
   }
 
+  @Transactional(isolation = Isolation.READ_COMMITTED)
+  public MfaAuthUser verifyTotpCode(final String code, final String username) {
+    final User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
+    final boolean isSuccessful = isSuccessful(user, code);
+    if (!isSuccessful || !user.requiresMfa()) {
+      throw new UnauthorizedException("Authentication failed");
+    }
+    final String refreshToken = tokenUtils.generateJwt(user, TokenType.REFRESH);
+    final String authToken = tokenUtils.generateJwt(user, TokenType.AUTH);
+    final List<Token> validUserTokens = tokenRepository.findAllValidTokensByUserId(
+        user.getUserId());
+    if (!validUserTokens.isEmpty()) {
+      validUserTokens.forEach(token -> token.setRevoked(true));
+      tokenRepository.saveAll(validUserTokens);
+    }
+    final Token token = new Token(refreshToken, false, user);
+    tokenRepository.save(token);
+    return new MfaAuthUser(authToken, refreshToken);
+  }
+
   private String generateQrImage(final String label, final String secret)
       throws QrGenerationException {
     final QrData data = new QrData.Builder()
@@ -90,5 +123,19 @@ public class MfaService {
     final byte[] imageData = generator.generate(data);
     final String mimeType = generator.getImageMimeType();
     return getDataUriForImage(imageData, mimeType);
+  }
+
+  private boolean isSuccessful(final User user, final String code) {
+    final TotpDevice totpDevice = user.getTotpDevice();
+    if (totpDevice == null) {
+      throw new UnauthorizedException("Authentication failed");
+    }
+    if (!totpDevice.isConfirmed() || !totpDevice.isEnabled()) {
+      throw new UnauthorizedException("Authentication failed");
+    }
+    final TimeProvider timeProvider = new SystemTimeProvider();
+    final CodeGenerator codeGenerator = new DefaultCodeGenerator();
+    final CodeVerifier verifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
+    return verifier.isValidCode(totpDevice.getSecret(), code);
   }
 }

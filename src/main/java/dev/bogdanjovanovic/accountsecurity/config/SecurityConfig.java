@@ -1,6 +1,6 @@
 package dev.bogdanjovanovic.accountsecurity.config;
 
-import dev.bogdanjovanovic.accountsecurity.auth.AuthTokenProvider;
+import dev.bogdanjovanovic.accountsecurity.token.AuthTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -22,12 +23,10 @@ public class SecurityConfig {
       "/api/v1/auth/logout",
       "/api/v1/auth/refresh"
   };
-  private final AuthTokenProvider authTokenProvider;
-//  private final TotpAuthFilter totpAuthFilter;
+  private final AuthTokenFilter authTokenFilter;
 
-  public SecurityConfig(final AuthTokenProvider authTokenProvider) {
-    this.authTokenProvider = authTokenProvider;
-//    this.totpAuthFilter = totpAuthFilter;
+  public SecurityConfig(final AuthTokenFilter authTokenFilter) {
+    this.authTokenFilter = authTokenFilter;
   }
 
   @Bean
@@ -41,8 +40,7 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-//        .addFilterAfter(totpAuthFilter, BearerTokenAuthenticationFilter.class)
-        .authenticationProvider(authTokenProvider)
+        .addFilterAfter(authTokenFilter, BearerTokenAuthenticationFilter.class)
         .exceptionHandling(exceptions -> exceptions
             .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
             .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))

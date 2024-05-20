@@ -61,13 +61,13 @@ public class AuthService {
         new UsernamePasswordAuthenticationToken(
             request.username(), request.password()
         ));
-//    if (user.requiresMfa()) {
-//      final String preAuthToken = tokenUtils.generateJwt(user, TokenType.PRE_AUTH);
-//      return new AuthUser(user.getUserId(), user.getUsername(), user.requiresMfa(), preAuthToken,
-//          null);
-//    }
+    if (user.requiresMfa()) {
+      final String preAuthToken = tokenUtils.generateJwt(user, TokenType.PRE_AUTH);
+      return new AuthUser(user.requiresMfa(), preAuthToken, null);
+    }
     final String refreshToken = tokenUtils.generateJwt(user, TokenType.REFRESH);
     final String authToken = tokenUtils.generateJwt(user, TokenType.AUTH);
+    revokeAllUserTokens(user);
     saveUserToken(user, refreshToken);
     return new AuthUser(user.requiresMfa(), authToken, refreshToken);
   }
@@ -94,9 +94,7 @@ public class AuthService {
     if (validUserTokens.isEmpty()) {
       return;
     }
-
     validUserTokens.forEach(token -> token.setRevoked(true));
-
     tokenRepository.saveAll(validUserTokens);
   }
 

@@ -5,14 +5,14 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: rootpassword
-      POSTGRES_DB: jwt_security
+      POSTGRES_DB: account_security
       PGDATA: /var/lib/postgresql/data/pgdata
     #    volumes:
     #      - db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
-      - jwtsecuritynetwork
+      - accountsecuritynetwork
     restart: unless-stopped
 
   adminer:
@@ -22,11 +22,11 @@ services:
     ports:
       - "8000:8080"
     networks:
-      - jwtsecuritynetwork
+      - accountsecuritynetwork
 
 networks:
-  jwtsecuritynetwork:
-    name: jwtsecuritynetwork
+  accountsecuritynetwork:
+    name: accountsecuritynetwork
     driver: bridge
 #volumes:
 #  db:

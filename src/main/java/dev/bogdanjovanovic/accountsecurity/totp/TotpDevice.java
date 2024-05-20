@@ -12,12 +12,12 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "otp_device")
+@Table(name = "totp_device")
 public class TotpDevice {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID otpDeviceId;
+  private UUID totpDeviceId;
   @Column(unique = true, nullable = false)
   private String deviceName;
   @Column(nullable = false)
@@ -30,18 +30,16 @@ public class TotpDevice {
   @JoinColumn(name = "user_id", referencedColumnName = "userId")
   private User user;
 
-  public TotpDevice() {}
+  public TotpDevice() {
+  }
 
-  public TotpDevice(String deviceName, String secret, boolean confirmed, boolean enabled, User user) {
+  public TotpDevice(String deviceName, String secret, boolean confirmed, boolean enabled,
+      User user) {
     this.deviceName = deviceName;
     this.secret = secret;
     this.confirmed = confirmed;
     this.enabled = enabled;
     this.user = user;
-  }
-
-  public UUID getOtpDeviceId() {
-    return otpDeviceId;
   }
 
   public String getDeviceName() {

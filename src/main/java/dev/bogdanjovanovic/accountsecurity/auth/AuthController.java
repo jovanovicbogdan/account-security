@@ -34,7 +34,6 @@ public class AuthController {
 
   @Value("${security.refresh-token-expiration}")
   private long refreshTokenExpiration;
-
   private final AuthService authService;
   private final TokenRepository tokenRepository;
 
@@ -55,14 +54,11 @@ public class AuthController {
       @RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
     log.info("Received login request");
     final AuthUser authUser = authService.authenticate(request);
-//    if (authUser.requiresMfa()) {
+    if (authUser.requiresMfa()) {
 //      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-//      response.setHeader("WWW-Authenticate", "OTP");
-//      return new ApiResponseWrapper<>(
-//          new AuthResponse(null, null, true,
-//              authUser.authToken())
-//      );
-//    }
+      response.setHeader("WWW-Authenticate", "OTP");
+      return new ApiResponseWrapper<>(new AuthResponse(true, authUser.authToken()));
+    }
     final Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, authUser.refreshToken());
     cookie.setHttpOnly(true);
     cookie.setPath("/");
@@ -82,7 +78,7 @@ public class AuthController {
     final Cookie refreshTokenCookie = Arrays.stream(request.getCookies())
         .filter(cookie -> REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName()))
         .findFirst()
-        .orElseThrow(() -> new UnauthorizedException("no cookie"));
+        .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
     final AuthUser authUser = authService.refreshAuthToken(refreshTokenCookie.getValue());
     return new ApiResponseWrapper<>(new AuthResponse(authUser.requiresMfa(), authUser.authToken()));
   }
