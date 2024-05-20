@@ -88,7 +88,7 @@ public class MfaService {
     totpDeviceRepository.save(totpDevice);
   }
 
-  @Transactional(isolation = Isolation.READ_COMMITTED)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public MfaAuthUser verifyTotpCode(final String code, final String username) {
     final User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));

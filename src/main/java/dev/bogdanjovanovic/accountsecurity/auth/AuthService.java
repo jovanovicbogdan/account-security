@@ -53,7 +53,7 @@ public class AuthService {
     userRepository.save(user);
   }
 
-  @Transactional(isolation = Isolation.READ_COMMITTED)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public AuthUser authenticate(final LoginRequest request) {
     final User user = userRepository.findByUsername(request.username())
         .orElseThrow(() -> new UnauthorizedException("Authentication failed"));
