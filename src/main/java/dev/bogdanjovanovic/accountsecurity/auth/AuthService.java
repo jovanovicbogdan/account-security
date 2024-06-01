@@ -1,6 +1,7 @@
 package dev.bogdanjovanovic.accountsecurity.auth;
 
 import dev.bogdanjovanovic.accountsecurity.exception.ConflictException;
+import dev.bogdanjovanovic.accountsecurity.totp.TotpDevice;
 import dev.bogdanjovanovic.accountsecurity.user.User;
 import dev.bogdanjovanovic.accountsecurity.user.User.Role;
 import dev.bogdanjovanovic.accountsecurity.exception.UnauthorizedException;
@@ -9,6 +10,7 @@ import dev.bogdanjovanovic.accountsecurity.token.Token.TokenType;
 import dev.bogdanjovanovic.accountsecurity.token.TokenRepository;
 import dev.bogdanjovanovic.accountsecurity.token.TokenUtils;
 import dev.bogdanjovanovic.accountsecurity.user.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,7 +50,7 @@ public class AuthService {
         .username(request.username())
         .passwordHash(passwordEncoder.encode(request.password()))
         .role(Role.USER)
-        .requiresMfa(request.requiresMfa())
+        .requiresMfa(false)
         .build();
     userRepository.save(user);
   }

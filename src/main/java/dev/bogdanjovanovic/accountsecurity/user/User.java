@@ -2,6 +2,7 @@ package dev.bogdanjovanovic.accountsecurity.user;
 
 import dev.bogdanjovanovic.accountsecurity.totp.TotpDevice;
 import dev.bogdanjovanovic.accountsecurity.token.Token;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -54,8 +55,9 @@ public class User implements UserDetails {
   private boolean requiresMfa = false;
   @OneToMany(mappedBy = "user")
   private List<Token> tokens = new ArrayList<>();
-  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-  private TotpDevice totpDevice = new TotpDevice();
+  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
+      CascadeType.MERGE})
+  private TotpDevice totpDevice;
   @CreatedDate
   private Instant createdAt;
   @LastModifiedDate
@@ -65,7 +67,8 @@ public class User implements UserDetails {
   }
 
   public User(UUID userId, String firstName, String lastName, String email, String username,
-      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens, TotpDevice totpDevice) {
+      String passwordHash, Role role, boolean requiresMfa, List<Token> tokens,
+      TotpDevice totpDevice) {
     this.userId = userId;
     this.firstName = firstName;
     this.lastName = lastName;

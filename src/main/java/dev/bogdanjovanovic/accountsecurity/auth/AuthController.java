@@ -55,8 +55,8 @@ public class AuthController {
     log.info("Received login request");
     final AuthUser authUser = authService.authenticate(request);
     if (authUser.requiresMfa()) {
-//      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.setHeader("WWW-Authenticate", "OTP");
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      response.setHeader("WWW-Authenticate", "TOTP");
       return new ApiResponseWrapper<>(new AuthResponse(true, authUser.authToken()));
     }
     final Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, authUser.refreshToken());

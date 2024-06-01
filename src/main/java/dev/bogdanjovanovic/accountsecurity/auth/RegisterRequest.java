@@ -7,8 +7,7 @@ public record RegisterRequest(
     @NotBlank String lastName,
     @NotBlank String email,
     @NotBlank String username,
-    @NotBlank String password,
-    @NotBlank boolean requiresMfa
+    @NotBlank String password
 ) {
 
 }
